@@ -12,49 +12,18 @@
     <Filter Include="shader">
       <UniqueIdentifier>{6f0c2412-48e7-44a7-9913-cc6091c24b80}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Src\body.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\collision.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\joint.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\world.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\shader.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\util\math.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Src\glad.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\main.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\body.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\collision.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\joint.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\world.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\util\math.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
+    <Filter Include="源文件\util">
+      <UniqueIdentifier>{47afa037-f63f-427c-a8be-16ccbe884ae6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\engine">
+      <UniqueIdentifier>{b67d854f-40f5-4447-af1a-a432abe1d51d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\util">
+      <UniqueIdentifier>{86e53455-b651-4815-afbd-48a66192d7c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\engine">
+      <UniqueIdentifier>{a4619965-7c46-459d-91f2-d9cde59f9857}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\shader\shader.f">
@@ -63,5 +32,48 @@
     <None Include="src\shader\shader.v">
       <Filter>shader</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\body.cpp">
+      <Filter>源文件\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\collision.cpp">
+      <Filter>源文件\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\joint.cpp">
+      <Filter>源文件\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\world.cpp">
+      <Filter>源文件\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\glad.c">
+      <Filter>源文件\util</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\math.cpp">
+      <Filter>源文件\util</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\engine\body.h">
+      <Filter>头文件\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\collision.h">
+      <Filter>头文件\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\joint.h">
+      <Filter>头文件\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\world.h">
+      <Filter>头文件\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\math.h">
+      <Filter>头文件\util</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\shader.h">
+      <Filter>头文件\util</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

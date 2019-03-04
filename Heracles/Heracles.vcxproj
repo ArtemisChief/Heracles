@@ -125,25 +125,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Src\body.h" />
-    <ClInclude Include="Src\collision.h" />
-    <ClInclude Include="Src\joint.h" />
-    <ClInclude Include="Src\shader.h" />
-    <ClInclude Include="Src\util\math.h" />
-    <ClInclude Include="Src\world.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Src\body.cpp" />
-    <ClCompile Include="Src\collision.cpp" />
-    <ClCompile Include="Src\glad.c" />
-    <ClCompile Include="Src\joint.cpp" />
-    <ClCompile Include="Src\main.cpp" />
-    <ClCompile Include="Src\util\math.cpp" />
-    <ClCompile Include="Src\world.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="src\shader\shader.f" />
     <None Include="src\shader\shader.v" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\engine\body.cpp" />
+    <ClCompile Include="src\engine\collision.cpp" />
+    <ClCompile Include="src\engine\joint.cpp" />
+    <ClCompile Include="src\engine\world.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\util\glad.c" />
+    <ClCompile Include="src\util\math.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\engine\body.h" />
+    <ClInclude Include="src\engine\collision.h" />
+    <ClInclude Include="src\engine\joint.h" />
+    <ClInclude Include="src\engine\world.h" />
+    <ClInclude Include="src\util\math.h" />
+    <ClInclude Include="src\util\shader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
