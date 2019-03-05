@@ -141,6 +141,15 @@ namespace Heracles {
 		Mat22(float a, float b, float c, float d) :mat_{ { {a, b}, {c, d} } } {}
 		Mat22(float theta) :mat_{ {{cos(theta), -sin(theta)}, {sin(theta), cos(theta)}} } {}
 
+		Mat22& operator=(const Mat22& mat22) {
+			if (this != &mat22) {
+				if (this != nullptr)
+					delete &this->mat_;
+				this->mat_ = mat22.mat_;
+			}
+			return *this;
+		}
+
 		Vec2 &operator[](size_t idx) {
 			return mat_[idx];
 		}
@@ -159,15 +168,6 @@ namespace Heracles {
 
 		Mat22 transpose() const {
 			return { mat_[0][0] ,mat_[1][0], mat_[0][1], mat_[1][1] };
-		}
-
-		Mat22& operator=(const Mat22& mat22) {
-			if (this != &mat22) {
-				if (this != nullptr)
-					delete &this->mat_;
-				this->mat_ = mat22.mat_;
-			}
-			return *this;
 		}
 	};
 
