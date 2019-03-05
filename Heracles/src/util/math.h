@@ -8,10 +8,10 @@
     TypeName(const TypeName&) = delete; \
     const TypeName& operator=(const TypeName&) = delete;
 
-
 namespace Heracles {
 
 	static const float pi = acos(-1);
+	static const float inf = std::numeric_limits<float>::max();
 
 	struct Vec2;
 	struct Mat22;
@@ -44,6 +44,8 @@ namespace Heracles {
 	inline void operator*=(Mat22& a, float b);
 	inline Vec2 operator*(const Vec2& a, const Mat22& b);
 	inline void operator*=(Vec2& a, const Mat22& b);
+
+	//--------------------------------------------------------------------
 
 	struct Vec2 {
 		float x;
@@ -126,6 +128,8 @@ namespace Heracles {
 		return a * Vec2(-b.y, b.x);
 	}
 
+	//--------------------------------------------------------------------
+
 	struct Mat22 {
 	private:
 		std::array<Vec2, 2> mat_;
@@ -133,6 +137,7 @@ namespace Heracles {
 	public:
 		static const Mat22 I;
 		Mat22() :Mat22(0, 0, 0, 0) {}
+		Mat22(const std::array<Vec2, 2>& mat) :mat_(mat) {}
 		Mat22(float a, float b, float c, float d) :mat_{ { {a, b}, {c, d} } } {}
 		Mat22(float theta) :mat_{ {{cos(theta), -sin(theta)}, {sin(theta), cos(theta)}} } {}
 
@@ -149,14 +154,20 @@ namespace Heracles {
 		}
 
 		Mat22 inv() const {
-			auto d = det();
-			return 1 / d * Mat22(mat_[1][1], -mat_[0][1], -mat_[1][0], mat_[0][0]);
+			return 1 / det() * Mat22(mat_[1][1], -mat_[0][1], -mat_[1][0], mat_[0][0]);
 		}
 
 		Mat22 transpose() const {
-			auto mat = mat_;
-			std::swap(mat[0][1], mat[1][0]);
-			return mat;
+			return { mat_[0][0] ,mat_[1][0], mat_[0][1], mat_[1][1] };
+		}
+
+		Mat22& operator=(const Mat22& mat22) {
+			if (this != &mat22) {
+				if (this != nullptr)
+					delete &this->mat_;
+				this->mat_ = mat22.mat_;
+			}
+			return *this;
 		}
 	};
 
