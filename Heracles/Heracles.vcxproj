@@ -70,8 +70,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>F:\Works\Heracles\Heracles\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>F:\Works\Heracles\Heracles\Libs;$(LibraryPath)</LibraryPath>
+    <IncludePath>F:\Works\Heracles\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>F:\Works\Heracles\Libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -82,9 +82,8 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <SubSystem>NotSet</SubSystem>
-      <EntryPointSymbol>
-      </EntryPointSymbol>
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
       <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -135,7 +134,6 @@
     <ClCompile Include="src\engine\world.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\util\glad.c" />
-    <ClCompile Include="src\util\math.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\engine\body.h" />

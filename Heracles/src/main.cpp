@@ -3,11 +3,6 @@
 #include <GLFW/glfw3.h>
 #include <thread>
 
-// 下面这三个是OpenGL数学运算库，之后可以考虑自己实现简单的以减少冗余度……
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 #include "util/shader.h"
 
 static GLFWwindow* window = nullptr;
@@ -17,28 +12,24 @@ static constexpr int WIN_WIDTH = 800;
 static constexpr int WIN_HEIGHT = 800;
 
 // 绘制刚体
-static void DrawBody()
-{
-	
+static void DrawBody() {
+
 }
 
 // 绘制铰链
-static void DrawJoint()
-{
-	
+static void DrawJoint() {
+
 }
 
 // 标题栏显示dt
-static void UpdateTitle(double dt)
-{
+static void UpdateTitle(double dt) {
 	std::stringstream ss;
 	ss << "Heracles - dt: " << std::to_string(dt * 1000).substr(0, 5) << " ms";
 	glfwSetWindowTitle(window, ss.str().c_str());
 }
 
 // 渲染
-static void Display(unsigned int VAO)
-{
+static void Display(unsigned int VAO) {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glBindVertexArray(VAO);
@@ -49,10 +40,8 @@ static void Display(unsigned int VAO)
 }
 
 // 处理输入操作
-static void Keyboard(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-	switch (key)
-	{
+static void Keyboard(GLFWwindow* window, int key, int scancode, int action, int mods) {
+	switch (key) {
 	case GLFW_KEY_ESCAPE:
 		glfwSetWindowShouldClose(window, true);
 		break;
@@ -60,8 +49,7 @@ static void Keyboard(GLFWwindow* window, int key, int scancode, int action, int 
 }
 
 // 时钟同步
-static auto DiffTime()
-{
+static auto DiffTime() {
 	using namespace std::chrono;
 	using Seconds = duration<double>;
 	static auto last_clock = high_resolution_clock::now();		// 每次调用high_resolution_clock::now()
@@ -74,11 +62,9 @@ static auto DiffTime()
 
 // 物理引擎运行部分
 static std::atomic<bool> should_stop{ false };
-static void HeraclesRun()
-{
+static void HeraclesRun() {
 	using namespace std::chrono_literals;
-	while(!should_stop)
-	{
+	while (!should_stop) {
 		std::this_thread::sleep_for(10ms);
 		auto dt = DiffTime().count();
 
@@ -87,8 +73,8 @@ static void HeraclesRun()
 	}
 }
 
-int main()
-{
+
+int main() {
 	// glfw初始化
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -97,8 +83,7 @@ int main()
 
 	// glfw窗口创建
 	window = glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "Heracles", nullptr, nullptr);
-	if (window == nullptr)
-	{
+	if (window == nullptr) {
 		glfwTerminate();
 		return -1;
 	}
@@ -106,8 +91,7 @@ int main()
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
 	// glad加载OpenGL函数指针
-	if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
-	{
+	if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
 		return -2;
 	}
 
@@ -153,8 +137,7 @@ int main()
 
 	// 渲染主循环
 	std::thread Heracles_thread(HeraclesRun);
-	while (!glfwWindowShouldClose(window))
-	{
+	while (!glfwWindowShouldClose(window)) {
 		Display(VAO);		// 显示图像
 		glfwPollEvents();	// 处理按键事件
 	}
