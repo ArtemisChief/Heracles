@@ -96,7 +96,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>NotSet</SubSystem>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
       <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
