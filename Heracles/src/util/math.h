@@ -140,8 +140,8 @@ namespace Heracles {
 		static const Mat22 I;
 		Mat22() :Mat22(0, 0, 0, 0) {}
 		Mat22(const std::array<Vec2, 2>& mat) :mat_(mat) {}
-		Mat22(GLfloat a, GLfloat b, GLfloat c, GLfloat d) :mat_{ { {a, b}, {c, d} } } {}
-		Mat22(GLfloat theta) :mat_{ {{cos(theta), -sin(theta)}, {sin(theta), cos(theta)}} } {}
+		Mat22(const GLfloat a, const GLfloat b, const GLfloat c, const GLfloat d) :mat_{ { {a, b}, {c, d} } } {}
+		Mat22(const GLfloat theta) :mat_{ {{cos(theta), -sin(theta)}, {sin(theta), cos(theta)}} } {}
 
 		Mat22& operator=(const Mat22& mat22) {
 			if (this != &mat22) {

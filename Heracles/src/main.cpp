@@ -6,6 +6,7 @@
 #include "util/shader.h"
 
 static GLFWwindow* window = nullptr;
+static Shader *shader = nullptr;
 
 // 设置
 static constexpr int WIN_WIDTH = 800;
@@ -29,9 +30,18 @@ static void UpdateTitle(double dt) {
 }
 
 // 渲染
-static void Display(unsigned int VAO) {
+static void Display(unsigned int &VAO) {
 	glClear(GL_COLOR_BUFFER_BIT);
 
+	Heracles::Vec2 translation(0.2, 0.3);	//世界坐标：平移
+	Heracles::Mat22 rotation(0.7);			//世界坐标：旋转
+	Heracles::Mat22 view(1, 0, 0, 1);		//摄像机坐标
+	Heracles::Mat22 projection(1, 0, 0, 1);	//投影透视坐标
+
+	shader->setVec2("translation", translation);
+	shader->setMat22("rotation", rotation);
+	shader->setMat22("view", view);
+	shader->setMat22("projection", projection);
 	glBindVertexArray(VAO);
 	glDrawElements(GL_LINES, 8, GL_UNSIGNED_INT, nullptr);
 
@@ -96,8 +106,8 @@ int main() {
 	}
 
 	// 构造并使用点着色器和片段着色器
-	Shader shader("src/Shader/Shader.v", "src/Shader/Shader.f");
-	shader.use();
+	shader = new Shader("src/Shader/Shader.v", "src/Shader/Shader.f");
+	shader->use();
 
 	// 画四边形的Demo，之后会改用工厂模式生成刚体类的对象
 	// 设置顶点数组，配置顶点数组对象（VAO）与顶点缓冲对象（VBO）
