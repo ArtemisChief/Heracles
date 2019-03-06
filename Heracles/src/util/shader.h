@@ -100,7 +100,7 @@ public:
 	}
 
 	void setMat22(const std::string &name, const Heracles::Mat22 &mat) const {
-		glUniformMatrix2fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+		glUniformMatrix2fv(glGetUniformLocation(ID, name.c_str()), 1, GL_TRUE, &mat[0][0]);
 	}
 
 private:
