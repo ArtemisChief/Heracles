@@ -33,8 +33,8 @@ static void UpdateTitle(double dt) {
 static void Display(unsigned int &VAO) {
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	Heracles::Vec2 translation(0.2, 0.3);	//世界坐标：平移
-	Heracles::Mat22 rotation(0.7);			//世界坐标：旋转
+	Heracles::Vec2 translation(0, cos(glfwGetTime()));	//世界坐标：平移
+	Heracles::Mat22 rotation(glfwGetTime());			//世界坐标：旋转
 	Heracles::Mat22 view(1, 0, 0, 1);		//摄像机坐标
 	Heracles::Mat22 projection(1, 0, 0, 1);	//投影透视坐标
 
