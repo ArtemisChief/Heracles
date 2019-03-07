@@ -13,7 +13,19 @@ static constexpr int WIN_WIDTH = 800;
 static constexpr int WIN_HEIGHT = 800;
 
 // 绘制刚体
-static void DrawBody() {
+static void DrawBody(unsigned int &VAO) {
+
+	Heracles::Vec2 translation(0, cos(glfwGetTime()));	//世界坐标：平移
+	Heracles::Mat22 rotation(glfwGetTime());			//世界坐标：旋转
+	Heracles::Mat22 view(1, 0, 0, 1);		//摄像机坐标
+	Heracles::Mat22 projection(1, 0, 0, 1);	//投影透视坐标
+
+	shader->setVec2("translation", translation);
+	shader->setMat22("rotation", rotation);
+	shader->setMat22("view", view);
+	shader->setMat22("projection", projection);
+	glBindVertexArray(VAO);
+	glDrawElements(GL_LINES, 8, GL_UNSIGNED_INT, nullptr);
 
 }
 
@@ -29,21 +41,12 @@ static void UpdateTitle(double dt) {
 	glfwSetWindowTitle(window, ss.str().c_str());
 }
 
-// 渲染
+// 渲染				//此处应无参数，没有实现刚体和世界类暂时这么写
 static void Display(unsigned int &VAO) {
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	Heracles::Vec2 translation(0, cos(glfwGetTime()));	//世界坐标：平移
-	Heracles::Mat22 rotation(glfwGetTime());			//世界坐标：旋转
-	Heracles::Mat22 view(1, 0, 0, 1);		//摄像机坐标
-	Heracles::Mat22 projection(1, 0, 0, 1);	//投影透视坐标
-
-	shader->setVec2("translation", translation);
-	shader->setMat22("rotation", rotation);
-	shader->setMat22("view", view);
-	shader->setMat22("projection", projection);
-	glBindVertexArray(VAO);
-	glDrawElements(GL_LINES, 8, GL_UNSIGNED_INT, nullptr);
+	//for (Body: world.bodyList)
+		DrawBody(VAO);
 
 	// glfw双缓冲+处理事件
 	glfwSwapBuffers(window);
