@@ -39,3 +39,11 @@ Simple 2D Physics Engine
     https://learnopengl-cn.github.io/
 
     https://www.khronos.org/opengl/wiki/
+
+4. Separating Axis Theorem (SAT) Explanation
+   
+   http://www.sevenson.com.au/actionscript/sat/
+
+   https://blog.csdn.net/yorhomwang/article/details/54869018
+
+   https://blog.csdn.net/qq_34594236/article/details/54015585
