@@ -71,11 +71,18 @@ namespace heracles {
 
 		polygon_body(uint16_t id, float mass, const vertex_list& vertices);
 
-		size_t count() const;
+		size_t edge_count() const;
 
 		vec2 operator[](size_t idx) const;
 		vec2 edge(size_t idx) const;
 
+		/* 分离轴定理（SAT）
+		 * 检测两凸多边形是否相交
+		 * 输入:	idx		产生最大间隙的轴
+		 *		other	另一个凸多边形刚体对象
+		 *		
+		 * 输出:	float 类型的数值，最大的间隙值，非负则表示不相交
+		 */
 		float min_separating_axis(size_t& idx, const polygon_body& other) const;
 	};
 }
