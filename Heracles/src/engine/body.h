@@ -29,10 +29,10 @@ namespace heracles {
 		virtual ~body() = default;
 
 		bool can_collide(const body& other) const;					// 是否可以发生碰撞（如刚体和地面返回false）
-		void update_impulse(const vec2 &impulse, const vec2 &r);	// 更新动量
-		void update_force(const vec2 &g, float dt);					// 更新力
+		void update_impulse(const vec2& impulse, const vec2& r);	// 更新动量
+		void update_force(const vec2& g, float dt);					// 更新力
 
-		vec2 local_to_world(const vec2 &local_position) const;					// 局部坐标转换到世界坐标
+		vec2 local_to_world(const vec2& local_position) const;		// 局部坐标转换到世界坐标
 
 		uint16_t get_id() const;
 
@@ -49,16 +49,16 @@ namespace heracles {
 		float get_torque() const;
 		float get_friction() const;
 
-		void set_mass(const float);
-		void set_inertia(const float);
-		void set_centroid(const vec2&);
-		void set_world_position(const vec2&);
-		void set_rotation(const mat22&);
-		void set_velocity(const vec2&);
-		void set_angular_velocity(const float);
-		void set_force(const vec2&);
-		void set_torque(const float);
-		void set_friction(const float);
+		void set_mass(const float mass);
+		void set_inertia(const float inertia);
+		void set_centroid(const vec2& centroid);
+		void set_world_position(const vec2& world_position);
+		void set_rotation(const mat22& rotation);
+		void set_velocity(const vec2& velocity);
+		void set_angular_velocity(const float angular_velocity);
+		void set_force(const vec2& force);
+		void set_torque(const float torque);
+		void set_friction(const float friction);
 	};
 
 	class polygon_body : public body {

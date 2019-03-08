@@ -76,26 +76,26 @@ public:
 	}
 
 	// …Ë÷√Uniform
-	void set_bool(const std::string &name, const bool value) const {
+	void set_bool(const std::string& name, const bool value) const {
 		glUniform1i(glGetUniformLocation(id, name.c_str()), static_cast<int>(value));
 	}
 
-	void set_int(const std::string &name, const int value) const {
+	void set_int(const std::string& name, const int value) const {
 		glUniform1i(glGetUniformLocation(id, name.c_str()), value);
 	}
 
-	void set_float(const std::string &name, const float value) const {
+	void set_float(const std::string& name, const float value) const {
 		glUniform1f(glGetUniformLocation(id, name.c_str()), value);
 	}
 
-	void set_vec2(const std::string &name, const heracles::vec2 &value) const {
+	void set_vec2(const std::string& name, const heracles::vec2& value) const {
 		glUniform2fv(glGetUniformLocation(id, name.c_str()), 1, &value[0]);
 	}
-	void set_vec2(const std::string &name, const float x, const float y) const {
+	void set_vec2(const std::string& name, const float x, const float y) const {
 		glUniform2f(glGetUniformLocation(id, name.c_str()), x, y);
 	}
 
-	void set_mat22(const std::string &name, const heracles::mat22 &mat) const {
+	void set_mat22(const std::string& name, const heracles::mat22& mat) const {
 		glUniformMatrix2fv(glGetUniformLocation(id, name.c_str()), 1, GL_TRUE, &mat[0][0]);
 	}
 

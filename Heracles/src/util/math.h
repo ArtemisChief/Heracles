@@ -15,18 +15,18 @@ namespace heracles {
 	struct vec2;
 	struct mat22;
 
-	inline vec2 operator+(const vec2 &a, const vec2 &b);
-	inline void operator+=(vec2 &a, const vec2 &b);
-	inline vec2 operator-(const vec2 &a, const vec2 &b);
-	inline void operator-=(vec2 &a, const vec2 &b);
-	inline vec2 operator*(const vec2 &a, float b);
-	inline vec2 operator*(float a, const vec2 &b);
-	inline void operator*=(vec2 &a, float b);
-	inline vec2 operator/(const vec2 &a, float b);
-	inline void operator/=(vec2 &a, float b);
-	inline float dot(const vec2 &a, const vec2 &b);
-	inline float cross(const vec2 &a, const vec2 &b);
-	inline vec2 cross(float a, const vec2 &b);
+	inline vec2 operator+(const vec2& a, const vec2& b);
+	inline void operator+=(vec2& a, const vec2& b);
+	inline vec2 operator-(const vec2& a, const vec2& b);
+	inline void operator-=(vec2& a, const vec2& b);
+	inline vec2 operator*(const vec2& a, float b);
+	inline vec2 operator*(float a, const vec2& b);
+	inline void operator*=(vec2& a, float b);
+	inline vec2 operator/(const vec2&a, float b);
+	inline void operator/=(vec2& a, float b);
+	inline float dot(const vec2& a, const vec2&b);
+	inline float cross(const vec2& a, const vec2& b);
+	inline vec2 cross(float a, const vec2& b);
 
 	inline mat22 operator+(const mat22& a, const mat22& b);
 	inline void operator+=(mat22& a, const mat22& b);

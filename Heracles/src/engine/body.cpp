@@ -10,12 +10,12 @@ namespace heracles {
 		return !(mass_ == inf && other.mass_ == inf);
 	}
 
-	void body::update_impulse(const vec2 &impulse, const vec2 &r) {
+	void body::update_impulse(const vec2& impulse, const vec2& r) {
 		velocity_ += impulse * inv_mass_;
 		angular_velocity_ += inv_inertia_ * cross(r, impulse);
 	}
 
-	void body::update_force(const vec2 &g, float dt) {
+	void body::update_force(const vec2& g, float dt) {
 		if (mass_ == inf)
 			return;
 		velocity_ += (g + force_ * inv_mass_) * dt;
@@ -24,7 +24,7 @@ namespace heracles {
 		rotation_ = mat22(angular_velocity_*dt)*rotation_;
 	}
 
-	vec2 body::local_to_world(const vec2 &local_position) const {
+	vec2 body::local_to_world(const vec2& local_position) const {
 		return world_position_ + local_position;
 	}
 

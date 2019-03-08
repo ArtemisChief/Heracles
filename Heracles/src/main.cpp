@@ -13,7 +13,7 @@ static constexpr int win_width = 800;
 static constexpr int win_height = 800;
 
 // 绘制刚体
-static void draw_body(unsigned int &vao) {
+static void draw_body(unsigned int& vao) {
 	const heracles::vec2 translation(0, cos(glfwGetTime()));	//世界坐标：平移
 	const heracles::mat22 rotation(glfwGetTime());			//世界坐标：旋转
 	const heracles::mat22 view(1, 0, 0, 1);		//摄像机坐标
@@ -40,7 +40,7 @@ static void UpdateTitle(const double dt) {
 }
 
 // 渲染				//此处应无参数，没有实现刚体和世界类暂时这么写
-static void display(unsigned int &vao) {
+static void display(unsigned int& vao) {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	//for (Body: world.bodyList)
