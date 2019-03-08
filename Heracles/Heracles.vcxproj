@@ -149,6 +149,7 @@
     <ClCompile Include="src\engine\world.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\util\glad.c" />
+    <ClCompile Include="src\util\math.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\engine\body.h" />

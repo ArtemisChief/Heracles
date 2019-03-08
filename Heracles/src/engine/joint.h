@@ -1,8 +1,8 @@
 #pragma once
 
-namespace Heracles {
+namespace heracles {
 
-	class Joint {
+	class joint {
 	public:
 
 	};

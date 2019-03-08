@@ -1,8 +1,8 @@
 #pragma once
 
-namespace Heracles {
+namespace heracles {
 
-	class World {
+	class world {
 	public:
 
 	};

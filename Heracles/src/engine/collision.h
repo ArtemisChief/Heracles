@@ -1,13 +1,13 @@
 #pragma once
 
-namespace Heracles {
+namespace heracles {
 
-	class Arbiter {
+	class arbiter {
 	public:
 
 	};
 
-	class ArbiterKey {
+	class arbiter_key {
 	public:
 
 	};
