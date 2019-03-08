@@ -2,13 +2,9 @@
 
 namespace heracles {
 
-	body::body(const uint16_t id, const float mass) :id_(id) {
-		set_mass(mass);
-	}
+	body::body(const uint16_t id, const float mass) :id_(id) { set_mass(mass); }
 
-	bool body::can_collide(const body& other) const {
-		return !(mass_ == inf && other.mass_ == inf);
-	}
+	bool body::can_collide(const body& other) const { return !(mass_ == inf && other.mass_ == inf); }
 
 	void body::update_impulse(const vec2& impulse, const vec2& r) {
 		velocity_ += impulse * inv_mass_;
@@ -24,12 +20,7 @@ namespace heracles {
 		rotation_ = mat22(angular_velocity_*dt)*rotation_;
 	}
 
-	vec2 body::local_to_world(const vec2& local_position) const {
-		return world_position_ + local_position;
-	}
-
 	uint16_t body::get_id() const { return id_; }
-
 	float body::get_mass() const { return mass_; }
 	float body::get_inv_mass() const { return inv_mass_; }
 	float body::get_inertia() const { return inertia_; }
@@ -54,5 +45,26 @@ namespace heracles {
 	void body::set_torque(const float torque) { torque_ = torque; }
 	void body::set_friction(const float friction) { friction_ = friction; }
 
+	polygon_body::polygon_body(uint16_t id, float mass, const vertex_list vertices) :body(id, mass), vertices_(vertices) {
+		//todo 计算转动惯量并赋值
+	}
+
+	size_t polygon_body::count() const {
+		return vertices_.size();
+	}
+
+	vec2 polygon_body::operator[](size_t idx) const {
+		return rotation_ * (vertices_[idx] - centroid_) + centroid_;
+	}
+
+	vec2 polygon_body::edge(size_t idx) const {
+		return (*this)[(idx + 1) % vertices_.size()] - (*this)[idx];
+	}
+
+
+	float polygon_body::min_separating_axis(size_t &idx, const polygon_body &other) const {
+		//todo 完成SAT算法
+		return 0;
+	}
 
 }

@@ -17,10 +17,9 @@ void main()
 	                   vec4(view[1], 0, 0),
 					   vec4(0, 0, 1, 0),
 					   vec4(0, 0, 0, 1))
-				  * (vec4(translation, 0, 0)
-				  + mat4(vec4(rotation[0], 0, 0),
+				  * mat4(vec4(rotation[0], 0, 0),
 	                   vec4(rotation[1], 0, 0),
 					   vec4(0, 0, 1, 0),
-					   vec4(0, 0, 0, 1))
-	              * vec4(aPos, 0, 1));
+					   vec4(translation, 0, 1))
+	              * vec4(aPos, 0, 1);
 }

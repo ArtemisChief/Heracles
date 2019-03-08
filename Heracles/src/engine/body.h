@@ -24,6 +24,7 @@ namespace heracles {
 
 	public:
 		using vertex_list = std::vector<vec2>;
+		using ptr = std::shared_ptr < body >;
 
 		body(uint16_t id, float mass);
 		virtual ~body() = default;
@@ -31,8 +32,6 @@ namespace heracles {
 		bool can_collide(const body& other) const;					// 是否可以发生碰撞（如刚体和地面返回false）
 		void update_impulse(const vec2& impulse, const vec2& r);	// 更新动量
 		void update_force(const vec2& g, float dt);					// 更新力
-
-		vec2 local_to_world(const vec2& local_position) const;		// 局部坐标转换到世界坐标
 
 		uint16_t get_id() const;
 
@@ -69,10 +68,9 @@ namespace heracles {
 	public:
 		using ptr = std::shared_ptr < polygon_body >;
 
-		polygon_body(uint16_t id, float mass, const vertex_list& vertices);
+		polygon_body(uint16_t id, float mass, const vertex_list vertices);
 
-		size_t edge_count() const;
-
+		size_t count() const;
 		vec2 operator[](size_t idx) const;
 		vec2 edge(size_t idx) const;
 

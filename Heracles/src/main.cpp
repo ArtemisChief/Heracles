@@ -4,26 +4,20 @@
 #include <thread>
 
 #include "util/shader.h"
+#include "engine/body.h"
 
 static GLFWwindow* window = nullptr;
-static shader *shader_program = nullptr;
+static shader* shader_program = nullptr;
 
 // 设置
 static constexpr int win_width = 800;
 static constexpr int win_height = 800;
 
 // 绘制刚体
-static void draw_body(unsigned int& vao) {
-	const heracles::vec2 translation(0, cos(glfwGetTime()));	//世界坐标：平移
-	const heracles::mat22 rotation(glfwGetTime());			//世界坐标：旋转
-	const heracles::mat22 view(1, 0, 0, 1);		//摄像机坐标
-	const heracles::mat22 projection(1, 0, 0, 1);	//投影透视坐标
-
-	shader_program->set_vec2("translation", translation);
-	shader_program->set_mat22("rotation", rotation);
-	shader_program->set_mat22("view", view);
-	shader_program->set_mat22("projection", projection);
-	glBindVertexArray(vao);
+static void draw_body(const heracles::body& body) {
+	shader_program->set_vec2("translation",body.get_world_position());
+	shader_program->set_mat22("rotation", body.get_rotation());
+	glBindVertexArray(body.get_id());
 	glDrawElements(GL_LINES, 8, GL_UNSIGNED_INT, nullptr);
 }
 
@@ -39,12 +33,12 @@ static void UpdateTitle(const double dt) {
 	glfwSetWindowTitle(window, ss.str().c_str());
 }
 
-// 渲染				//此处应无参数，没有实现刚体和世界类暂时这么写
-static void display(unsigned int& vao) {
+// 渲染				//此处应无参数，没有实现世界类暂时这么写
+static void display(const heracles::body& body) {
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	//for (Body: world.bodyList)
-		draw_body(vao);
+	//for (body: world.bodyList)
+		draw_body(body);
 
 	// glfw双缓冲+处理事件
 	glfwSwapBuffers(window);
@@ -111,13 +105,16 @@ int main() {
 	shader_program = new shader("src/Shader/Shader.v", "src/Shader/Shader.f");
 	shader_program->use();
 
+	shader_program->set_mat22("view", heracles::mat22(1, 0, 0, 1));
+	shader_program->set_mat22("projection", heracles::mat22(0.01, 0, 0, 0.01));
+
 	// 画四边形的Demo，之后会改用工厂模式生成刚体类的对象
 	// 设置顶点数组，配置顶点数组对象（VAO）与顶点缓冲对象（VBO）
-	float vertices[] = {
-		-0.5f, -0.5f, // Bottom Left
-		 0.5f, -0.5f, // Bottom Right
-		 0.5f,  0.5f, // Top Right
-		-0.5f,  0.5f  // Top Left
+	heracles::body::vertex_list vertices = {
+		heracles::vec2(-5.0f, -5.0f),	// Bottom Left
+		heracles::vec2( 5.0f, -5.0f),	// Bottom Right
+		heracles::vec2( 5.0f,  5.0f),	// Top Right
+		heracles::vec2(-5.0f,  5.0f)	// Top Left
 	};
 
 	unsigned int indices[] = {
@@ -132,11 +129,13 @@ int main() {
 	glGenBuffers(1, &vbo);
 	glGenBuffers(1, &ebo);
 
+	const heracles::polygon_body test_polygon_body(vao, 1.0, vertices);
+
 	// 处理顶点
 	glBindVertexArray(vao);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof vertices, vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 2 * vertices.size(), &vertices[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof indices, indices, GL_STATIC_DRAW);
@@ -150,7 +149,7 @@ int main() {
 	// 渲染主循环
 	std::thread heracles_thread(heracles_run);
 	while (!glfwWindowShouldClose(window)) {
-		display(vao);		// 显示图像
+		display(test_polygon_body);		// 显示图像
 		glfwPollEvents();	// 处理按键事件
 	}
 
