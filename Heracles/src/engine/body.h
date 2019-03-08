@@ -1,10 +1,81 @@
 #pragma once
+#include <vector>
+#include "../util/math.h"
 
-namespace Heracles {
+namespace heracles {
 
-	class Body {
+	class body {
+	protected:
+		DISALLOW_COPY_AND_ASSIGN(body);
+
+		uint16_t id_;							// 刚体ID
+		float mass_;							// 质量
+		float inv_mass_;						// 质量倒数
+		float inertia_;							// 转动惯量
+		float inv_inertia_;						// 转动惯量倒数
+		vec2  centroid_			{ 0, 0 };		// 质心
+		vec2  world_position_	{ 0, 0 };		// 世界坐标位置
+		mat22 rotation_			{ mat22::i };	// 旋转
+		vec2  velocity_			{ 0, 0 };		// 速度
+		float angular_velocity_	{ 0 };			// 角速度
+		vec2  force_			{ 0, 0 };		// 受力
+		float torque_			{ 0 };			// 扭矩
+		float friction_			{ 1 };			// 摩擦力
+
 	public:
-		
+		using vertex_list = std::vector<vec2>;
+
+		body(uint16_t id, float mass);
+		virtual ~body() = default;
+
+		bool can_collide(const body& other) const;					// 是否可以发生碰撞（如刚体和地面返回false）
+		void update_impulse(const vec2 &impulse, const vec2 &r);	// 更新动量
+		void update_force(const vec2 &g, float dt);					// 更新力
+
+		vec2 local_to_world(const vec2 &local_position) const;					// 局部坐标转换到世界坐标
+
+		uint16_t get_id() const;
+
+		float get_mass() const;
+		float get_inv_mass() const;
+		float get_inertia() const;
+		float get_inv_inertia() const;
+		const vec2& get_centroid() const;
+		const vec2& get_world_position() const;
+		const mat22& get_rotation() const;
+		const vec2& get_velocity() const;
+		float get_angular_velocity() const;
+		const vec2& get_force() const;
+		float get_torque() const;
+		float get_friction() const;
+
+		void set_mass(const float);
+		void set_inertia(const float);
+		void set_centroid(const vec2&);
+		void set_world_position(const vec2&);
+		void set_rotation(const mat22&);
+		void set_velocity(const vec2&);
+		void set_angular_velocity(const float);
+		void set_force(const vec2&);
+		void set_torque(const float);
+		void set_friction(const float);
 	};
 
+	class polygon_body : public body {
+	protected:
+		DISALLOW_COPY_AND_ASSIGN(polygon_body);
+		vertex_list vertices_;
+
+	public:
+		using ptr = std::shared_ptr < polygon_body >;
+
+		polygon_body(uint16_t id, float mass, const vertex_list& vertices);
+
+		size_t count() const;
+
+		vec2 operator[](size_t idx) const;
+		vec2 edge(size_t idx) const;
+
+		float min_separating_axis(size_t& idx, const polygon_body& other) const;
+	};
 }
