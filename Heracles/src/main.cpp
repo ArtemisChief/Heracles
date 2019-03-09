@@ -5,20 +5,26 @@
 
 #include "util/shader.h"
 #include "engine/body.h"
+#include "engine/world.h"
 
 static GLFWwindow* window = nullptr;
 static shader* shader_program = nullptr;
+static heracles::world the_world({ 0.0f, -9.8f });
 
 // 设置
 static constexpr int win_width = 800;
 static constexpr int win_height = 800;
+// 视点向量与投影矩阵
+static float zoom = 0.0f;
+static heracles::vec2 view(0.0f, 0.0f);
+static heracles::mat22 projection(0.01f, 0, 0, 0.01f);
 
 // 绘制刚体
-static void draw_body(const heracles::body& body) {
-	shader_program->set_vec2("translation",body.get_world_position());
+static void draw_body(heracles::polygon_body& body) {
+	shader_program->set_vec2("translation", body.get_world_position());
 	shader_program->set_mat22("rotation", body.get_rotation());
-	glBindVertexArray(body.get_id());
-	glDrawElements(GL_LINES, 8, GL_UNSIGNED_INT, nullptr);
+	glBindVertexArray(*body.get_id());
+	glDrawElements(GL_LINE_STRIP, 8, GL_UNSIGNED_INT, nullptr);
 }
 
 // 绘制铰链
@@ -27,31 +33,10 @@ static void draw_joint() {
 }
 
 // 标题栏显示dt
-static void UpdateTitle(const double dt) {
+static void update_title(const double dt) {
 	std::stringstream ss;
 	ss << "Heracles - dt: " << std::to_string(dt * 1000).substr(0, 5) << " ms";
 	glfwSetWindowTitle(window, ss.str().c_str());
-}
-
-// 渲染				//此处应无参数，没有实现世界类暂时这么写
-static void display(const heracles::body& body) {
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	//for (body: world.bodyList)
-		draw_body(body);
-
-	// glfw双缓冲+处理事件
-	glfwSwapBuffers(window);
-}
-
-// 处理输入操作
-static void keyboard(GLFWwindow* window, const int key, int scancode, int action, int mods) {
-	switch (key) {
-	case GLFW_KEY_ESCAPE:
-		glfwSetWindowShouldClose(window, true);
-		break;
-	default: ;
-	}
 }
 
 // 时钟同步
@@ -61,9 +46,115 @@ static auto diff_time() {
 	static auto last_clock = high_resolution_clock::now();		// 每次调用high_resolution_clock::now()
 	const auto now = high_resolution_clock::now();				// 后一次一定比前一次大
 	const auto dt = duration_cast<seconds>(now - last_clock);	// 保证tick经过一个稳定的时间间隔
-	UpdateTitle(dt.count());									// 显示dt
+	update_title(dt.count());									// 显示dt
 	last_clock = now;
 	return dt;
+}
+
+// 绑定刚体对象的顶点，新创建的刚体只需要调用一次该函数
+static void bind_vertex_array(heracles::polygon_body& body) {
+	heracles::body::vertex_list vertices = body.get_vertices();
+
+	unsigned int indices[] = {
+		0, 1,	// Bottom Edge
+		1, 2,	// Right Edge
+		2, 3,	// Top Edge
+		3, 0	// Left Edge
+	};
+
+	// 设置顶点数组，配置顶点数组对象（VAO）与顶点缓冲对象（VBO）
+	unsigned int* vao = body.get_id();
+	unsigned int vbo, ebo;
+	glGenVertexArrays(1, vao);
+	glGenBuffers(1, &vbo);
+	glGenBuffers(1, &ebo);
+
+	// 处理顶点
+	glBindVertexArray(*vao);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 2 * vertices.size(), &vertices[0], GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof indices, indices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), static_cast<void*>(nullptr));
+	glEnableVertexAttribArray(0);
+}
+
+// 渲染
+static void display() {
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	for (auto &body:the_world.get_bodies())
+		draw_body(*std::dynamic_pointer_cast<heracles::polygon_body>(body).get());
+
+	// glfw双缓冲+处理事件
+	glfwSwapBuffers(window);
+}
+
+// 摄像机移动
+static void move_camera(const heracles::vec2 translation) {
+	view += translation;
+	shader_program->set_vec2("view", view);
+}
+
+// 鼠标按键回调函数
+static void mouse_callback(GLFWwindow* window, const int button, const int action, const int mods) {
+	if (action == GLFW_PRESS) switch (button) {
+	//鼠标左键放置刚体
+	case GLFW_MOUSE_BUTTON_LEFT: {
+		double x, y;
+		glfwGetCursorPos(window, &x, &y);
+		heracles::vec2 pos(x, -y);
+		const heracles::vec2 offset(-400, 400);
+		pos = projection.inv() * ((offset + pos) / 400) + view;
+
+		std::cout << pos.x << " " << pos.y << std::endl;
+
+		// 世界创造刚体
+		heracles::polygon_body::ptr body = the_world.create_box(1, 10, 10, pos);
+		the_world.add(body);
+
+		//绑定刚体的顶点属性
+		bind_vertex_array(*std::dynamic_pointer_cast<heracles::polygon_body>(body).get());
+	}
+
+	// 鼠标右键给某个刚体施加力
+	case GLFW_MOUSE_BUTTON_RIGHT: {
+		break;
+	}
+	}
+}
+
+// 鼠标滚轮回调函数
+void scroll_callback(GLFWwindow* window, const double xoffset, const double yoffset) {
+	if (zoom >= -10.0f && zoom <= 25.0f) {
+		zoom += yoffset;
+		projection[0].x = 0.01f + zoom / 2000.0f;
+		projection[1].y = 0.01f + zoom / 2000.0f;
+		shader_program->set_mat22("projection", projection);
+	}
+	if (zoom <= -10.0f)
+		zoom = -10.0f;
+	if (zoom >= 25.0f)
+		zoom = 25.0f;
+}
+
+// 处理输入
+void processInput(GLFWwindow *window) {
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, true);
+
+	const float camera_speed = 2.0f;
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		move_camera(heracles::vec2(0, 1 * camera_speed));
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		move_camera(heracles::vec2(-1 * camera_speed, 0));
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		move_camera(heracles::vec2(0, -1 * camera_speed));
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		move_camera(heracles::vec2(1 * camera_speed, 0));
 }
 
 // 物理引擎运行部分
@@ -104,59 +195,25 @@ int main() {
 	// 构造并使用点着色器和片段着色器
 	shader_program = new shader("src/Shader/Shader.v", "src/Shader/Shader.f");
 	shader_program->use();
+	shader_program->set_vec2("view", view);
+	shader_program->set_mat22("projection", projection);
 
-	shader_program->set_mat22("view", heracles::mat22(1, 0, 0, 1));
-	shader_program->set_mat22("projection", heracles::mat22(0.01, 0, 0, 0.01));
-
-	// 画四边形的Demo，之后会改用工厂模式生成刚体类的对象
-	// 设置顶点数组，配置顶点数组对象（VAO）与顶点缓冲对象（VBO）
-	heracles::body::vertex_list vertices = {
-		heracles::vec2(-5.0f, -5.0f),	// Bottom Left
-		heracles::vec2( 5.0f, -5.0f),	// Bottom Right
-		heracles::vec2( 5.0f,  5.0f),	// Top Right
-		heracles::vec2(-5.0f,  5.0f)	// Top Left
-	};
-
-	unsigned int indices[] = {
-		0, 1,
-		1, 2,
-		2, 3,
-		3, 0
-	};
-
-	unsigned int vbo, vao, ebo;
-	glGenVertexArrays(1, &vao);
-	glGenBuffers(1, &vbo);
-	glGenBuffers(1, &ebo);
-
-	const heracles::polygon_body test_polygon_body(vao, 1.0, vertices);
-
-	// 处理顶点
-	glBindVertexArray(vao);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 2 * vertices.size(), &vertices[0], GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof indices, indices, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), static_cast<void*>(nullptr));
-	glEnableVertexAttribArray(0);
-
-	// 设置按键回调函数
-	glfwSetKeyCallback(window, keyboard);
+	// 设置鼠标回调函数
+	glfwSetMouseButtonCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
 
 	// 渲染主循环
 	std::thread heracles_thread(heracles_run);
 	while (!glfwWindowShouldClose(window)) {
-		display(test_polygon_body);		// 显示图像
-		glfwPollEvents();	// 处理按键事件
+		processInput(window);	// 处理输入
+		display();				// 显示图像
+		glfwPollEvents();		// 处理事件
 	}
 
 	// 删除顶点数据
-	glDeleteVertexArrays(1, &vao);
-	glDeleteBuffers(1, &vbo);
-	glDeleteBuffers(1, &ebo);
+	//glDeleteVertexArrays(1, &vao);
+	//glDeleteBuffers(1, &vbo);
+	//glDeleteBuffers(1, &ebo);
 
 	// glfw终结，释放资源
 	glfwTerminate();

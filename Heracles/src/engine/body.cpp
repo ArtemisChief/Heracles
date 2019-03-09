@@ -20,7 +20,7 @@ namespace heracles {
 		rotation_ = mat22(angular_velocity_*dt)*rotation_;
 	}
 
-	uint16_t body::get_id() const { return id_; }
+	unsigned int* body::get_id() { return &id_; }
 	float body::get_mass() const { return mass_; }
 	float body::get_inv_mass() const { return inv_mass_; }
 	float body::get_inertia() const { return inertia_; }
@@ -49,18 +49,13 @@ namespace heracles {
 		//todo 计算转动惯量并赋值
 	}
 
-	size_t polygon_body::count() const {
-		return vertices_.size();
-	}
+	size_t polygon_body::count() const { return vertices_.size(); }
 
-	vec2 polygon_body::operator[](size_t idx) const {
-		return rotation_ * (vertices_[idx] - centroid_) + centroid_;
-	}
+	vec2 polygon_body::operator[](size_t idx) const { return rotation_ * (vertices_[idx] - centroid_) + centroid_; }
 
-	vec2 polygon_body::edge(size_t idx) const {
-		return (*this)[(idx + 1) % vertices_.size()] - (*this)[idx];
-	}
+	vec2 polygon_body::edge(size_t idx) const { return (*this)[(idx + 1) % vertices_.size()] - (*this)[idx]; }
 
+	body::vertex_list polygon_body::get_vertices() const { return vertices_; }
 
 	float polygon_body::min_separating_axis(size_t &idx, const polygon_body &other) const {
 		//todo 完成SAT算法

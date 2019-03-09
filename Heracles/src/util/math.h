@@ -9,7 +9,7 @@
 
 namespace heracles {
 
-	static const float pi = acos(-1);
+	static const float pi = acos(-1.0f);
 	static const float inf = std::numeric_limits<float>::max();
 
 	struct vec2;

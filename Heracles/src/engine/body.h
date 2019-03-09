@@ -8,7 +8,7 @@ namespace heracles {
 	protected:
 		DISALLOW_COPY_AND_ASSIGN(body);
 
-		uint16_t id_;							// 刚体ID
+		unsigned int id_;								// 刚体ID
 		float mass_;							// 质量
 		float inv_mass_;						// 质量倒数
 		float inertia_;							// 转动惯量
@@ -33,8 +33,7 @@ namespace heracles {
 		void update_impulse(const vec2& impulse, const vec2& r);	// 更新动量
 		void update_force(const vec2& g, float dt);					// 更新力
 
-		uint16_t get_id() const;
-
+		unsigned int* get_id();
 		float get_mass() const;
 		float get_inv_mass() const;
 		float get_inertia() const;
@@ -73,6 +72,8 @@ namespace heracles {
 		size_t count() const;
 		vec2 operator[](size_t idx) const;
 		vec2 edge(size_t idx) const;
+
+		vertex_list get_vertices() const;;
 
 		/* 分离轴定理（SAT）
 		 * 检测两凸多边形是否相交
