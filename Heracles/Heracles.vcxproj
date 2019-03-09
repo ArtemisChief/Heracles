@@ -139,12 +139,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="src\shader\shader.f" />
-    <None Include="src\shader\shader.v" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="src\graphics_engine\game_renderer.cpp" />
     <ClCompile Include="src\graphics_engine\resource_manager.cpp" />
+    <ClCompile Include="src\graphics_engine\shader.cpp" />
+    <ClCompile Include="src\graphics_engine\texture.cpp" />
     <ClCompile Include="src\graphics_engine\text_renderer.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\physics_engine\body.cpp" />
@@ -158,14 +156,19 @@
   <ItemGroup>
     <ClInclude Include="src\graphics_engine\game_renderer.h" />
     <ClInclude Include="src\graphics_engine\resource_manager.h" />
+    <ClInclude Include="src\graphics_engine\shader.h" />
+    <ClInclude Include="src\graphics_engine\texture.h" />
     <ClInclude Include="src\graphics_engine\text_renderer.h" />
     <ClInclude Include="src\physics_engine\body.h" />
     <ClInclude Include="src\physics_engine\collision.h" />
     <ClInclude Include="src\physics_engine\joint.h" />
     <ClInclude Include="src\physics_engine\world.h" />
     <ClInclude Include="src\util\math.h" />
-    <ClInclude Include="src\util\shader.h" />
     <ClInclude Include="src\util\stb_image.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\graphics_engine\shader\shader.f" />
+    <None Include="src\graphics_engine\shader\shader.v" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

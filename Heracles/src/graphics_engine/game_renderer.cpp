@@ -1,4 +1,8 @@
+#include <iostream>
+#include <sstream>
+
 #include "game_renderer.h"
+#include "resource_manager.h"
 
 namespace heracles {
 
@@ -22,8 +26,8 @@ namespace heracles {
 
 	// 绘制刚体
 	void game_renderer::draw_body(polygon_body& body) {
-		shader_program_->set_vec2("translation", body.get_world_position());
-		shader_program_->set_mat22("rotation", body.get_rotation());
+		resource_manager::get_shader("shader").set_vec2("translation", body.get_world_position());
+		resource_manager::get_shader("shader").set_mat22("rotation", body.get_rotation());
 		//glBindTexture(GL_TEXTURE_2D, texture);
 		glBindVertexArray(*body.get_id());
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
@@ -84,27 +88,8 @@ namespace heracles {
 		//glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), reinterpret_cast<void*>(2 * sizeof(float)));
 		//glEnableVertexAttribArray(1);
 
-		//glGenTextures(1, &texture);
-		//glBindTexture(GL_TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-		//// set the texture wrapping parameters
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		//// set texture filtering parameters
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		//// load image, create texture and generate mipmaps
-		//stbi_set_flip_vertically_on_load(true);
-		//int width, height, nrChannels;
-		//// The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
-		//unsigned char *data = stbi_load("src/resources/test.jpg", &width, &height, &nrChannels, 0);
-		//if (data) {
-		//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		//	glGenerateMipmap(GL_TEXTURE_2D);
-		//}
-		//else {
-		//	std::cout << "Failed to load texture" << std::endl;
-		//}
-		//stbi_image_free(data);
+		//todo 加载纹理
+
 	}
 
 	// 渲染
@@ -121,7 +106,7 @@ namespace heracles {
 	// 摄像机移动
 	void game_renderer::move_camera(const vec2 translation) {
 		view_ += translation;
-		shader_program_->set_vec2("view", view_);
+		resource_manager::get_shader("shader").set_vec2("view", view_);
 	}
 
 	// 鼠标按键回调函数
@@ -143,7 +128,7 @@ namespace heracles {
 			//绑定刚体的顶点属性
 			bind_vertex_array(*std::dynamic_pointer_cast<polygon_body>(body).get());
 
-			std::cout << "Create Box " << body->get_id() << ": [" << pos.x << " " << pos.y << "]" << std::endl;
+			std::cout << "Create Box (" << body->get_id() << ") : [" << pos.x << " " << pos.y << "]" << std::endl;
 		}
 
 									 // 鼠标右键给某个刚体施加力
@@ -159,7 +144,7 @@ namespace heracles {
 			zoom_ += yoffset;
 			projection_[0].x = 8.0f / win_width_ + zoom_ / (win_width_ * 2.5f);
 			projection_[1].y = 8.0f / win_height_ + zoom_ / (win_height_ * 2.5f);
-			shader_program_->set_mat22("projection", projection_);
+			resource_manager::get_shader("shader").set_mat22("projection", projection_);
 		}
 		if (zoom_ <= -10.0f)
 			zoom_ = -10.0f;
@@ -194,7 +179,7 @@ namespace heracles {
 		win_height_ = height;
 		projection_[0].x = 8.0f / win_width_ + zoom_ / (win_width_ * 2.5f);
 		projection_[1].y = 8.0f / win_height_ + zoom_ / (win_height_ * 2.5f);
-		shader_program_->set_mat22("projection", projection_);
+		resource_manager::get_shader("shader").set_mat22("projection", projection_);
 	}
 
 	// 物理引擎运行部分
@@ -237,10 +222,10 @@ namespace heracles {
 		}
 
 		// 构造并使用点着色器和片段着色器
-		shader_program_ = new shader("src/Shader/Shader.v", "src/Shader/Shader.f");
-		shader_program_->use();
-		shader_program_->set_vec2("view", view_);
-		shader_program_->set_mat22("projection", projection_);
+		resource_manager::load_shader("src/graphics_engine/shader/shader.v", "src/graphics_engine/shader/shader.f", "shader");
+		resource_manager::get_shader("shader").use();
+		resource_manager::get_shader("shader").set_vec2("view", view_);
+		resource_manager::get_shader("shader").set_mat22("projection", projection_);
 
 		// 线框模式
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

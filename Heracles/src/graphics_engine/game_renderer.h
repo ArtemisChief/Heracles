@@ -4,10 +4,11 @@
 #include <GLFW/glfw3.h>
 #include <thread>
 
-#include "../util/shader.h"
+#include "shader.h"
 #include "../util/stb_image.h"
 #include "../physics_engine/body.h"
 #include "../physics_engine/world.h"
+
 
 namespace heracles {
 	class game_renderer {

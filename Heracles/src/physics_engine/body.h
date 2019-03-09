@@ -8,7 +8,7 @@ namespace heracles {
 	protected:
 		DISALLOW_COPY_AND_ASSIGN(body);
 
-		unsigned int id_;								// 刚体ID
+		unsigned int id_;						// 刚体ID
 		float mass_;							// 质量
 		float inv_mass_;						// 质量倒数
 		float inertia_;							// 转动惯量
