@@ -15,14 +15,20 @@
     <Filter Include="源文件\util">
       <UniqueIdentifier>{47afa037-f63f-427c-a8be-16ccbe884ae6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\engine">
-      <UniqueIdentifier>{b67d854f-40f5-4447-af1a-a432abe1d51d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="头文件\util">
       <UniqueIdentifier>{86e53455-b651-4815-afbd-48a66192d7c1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件\engine">
+    <Filter Include="头文件\physics_engine">
       <UniqueIdentifier>{a4619965-7c46-459d-91f2-d9cde59f9857}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\physics_engine">
+      <UniqueIdentifier>{b67d854f-40f5-4447-af1a-a432abe1d51d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\graphics_engine">
+      <UniqueIdentifier>{f9f4a8d6-ee48-4b33-8fab-9aa5a5bb1aa8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\graphics_engine">
+      <UniqueIdentifier>{172289d6-7f1a-4fef-80ad-5c1b8acf35ce}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -37,43 +43,67 @@
     <ClCompile Include="src\main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\body.cpp">
-      <Filter>源文件\engine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\collision.cpp">
-      <Filter>源文件\engine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\joint.cpp">
-      <Filter>源文件\engine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\world.cpp">
-      <Filter>源文件\engine</Filter>
-    </ClCompile>
     <ClCompile Include="src\util\glad.c">
       <Filter>源文件\util</Filter>
     </ClCompile>
     <ClCompile Include="src\util\math.cpp">
       <Filter>源文件\util</Filter>
     </ClCompile>
+    <ClCompile Include="src\util\stb_image.cpp">
+      <Filter>源文件\util</Filter>
+    </ClCompile>
+    <ClCompile Include="src\physics_engine\body.cpp">
+      <Filter>源文件\physics_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\physics_engine\collision.cpp">
+      <Filter>源文件\physics_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\physics_engine\joint.cpp">
+      <Filter>源文件\physics_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\physics_engine\world.cpp">
+      <Filter>源文件\physics_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics_engine\resource_manager.cpp">
+      <Filter>源文件\graphics_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics_engine\text_renderer.cpp">
+      <Filter>源文件\graphics_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics_engine\game_renderer.cpp">
+      <Filter>源文件\graphics_engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\engine\body.h">
-      <Filter>头文件\engine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\collision.h">
-      <Filter>头文件\engine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\joint.h">
-      <Filter>头文件\engine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\world.h">
-      <Filter>头文件\engine</Filter>
-    </ClInclude>
     <ClInclude Include="src\util\math.h">
       <Filter>头文件\util</Filter>
     </ClInclude>
     <ClInclude Include="src\util\shader.h">
       <Filter>头文件\util</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\stb_image.h">
+      <Filter>头文件\util</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physics_engine\body.h">
+      <Filter>头文件\physics_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physics_engine\collision.h">
+      <Filter>头文件\physics_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physics_engine\joint.h">
+      <Filter>头文件\physics_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physics_engine\world.h">
+      <Filter>头文件\physics_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics_engine\resource_manager.h">
+      <Filter>头文件\graphics_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics_engine\text_renderer.h">
+      <Filter>头文件\graphics_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics_engine\game_renderer.h">
+      <Filter>头文件\graphics_engine</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

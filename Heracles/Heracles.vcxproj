@@ -95,7 +95,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>NotSet</SubSystem>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -143,21 +143,29 @@
     <None Include="src\shader\shader.v" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\engine\body.cpp" />
-    <ClCompile Include="src\engine\collision.cpp" />
-    <ClCompile Include="src\engine\joint.cpp" />
-    <ClCompile Include="src\engine\world.cpp" />
+    <ClCompile Include="src\graphics_engine\game_renderer.cpp" />
+    <ClCompile Include="src\graphics_engine\resource_manager.cpp" />
+    <ClCompile Include="src\graphics_engine\text_renderer.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\physics_engine\body.cpp" />
+    <ClCompile Include="src\physics_engine\collision.cpp" />
+    <ClCompile Include="src\physics_engine\joint.cpp" />
+    <ClCompile Include="src\physics_engine\world.cpp" />
     <ClCompile Include="src\util\glad.c" />
     <ClCompile Include="src\util\math.cpp" />
+    <ClCompile Include="src\util\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\engine\body.h" />
-    <ClInclude Include="src\engine\collision.h" />
-    <ClInclude Include="src\engine\joint.h" />
-    <ClInclude Include="src\engine\world.h" />
+    <ClInclude Include="src\graphics_engine\game_renderer.h" />
+    <ClInclude Include="src\graphics_engine\resource_manager.h" />
+    <ClInclude Include="src\graphics_engine\text_renderer.h" />
+    <ClInclude Include="src\physics_engine\body.h" />
+    <ClInclude Include="src\physics_engine\collision.h" />
+    <ClInclude Include="src\physics_engine\joint.h" />
+    <ClInclude Include="src\physics_engine\world.h" />
     <ClInclude Include="src\util\math.h" />
     <ClInclude Include="src\util\shader.h" />
+    <ClInclude Include="src\util\stb_image.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
