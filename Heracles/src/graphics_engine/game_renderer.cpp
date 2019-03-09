@@ -45,7 +45,7 @@ namespace heracles {
 	auto game_renderer::diff_time() {
 		using namespace std::chrono;
 		using seconds = duration<double>;
-		auto last_clock = high_resolution_clock::now();				// 每次调用high_resolution_clock::now()
+		static auto last_clock = high_resolution_clock::now();				// 每次调用high_resolution_clock::now()
 		const auto now = high_resolution_clock::now();				// 后一次一定比前一次大
 		const auto dt = duration_cast<seconds>(now - last_clock);	// 保证tick经过一个稳定的时间间隔
 		update_title(dt.count());									// 显示dt
@@ -133,17 +133,17 @@ namespace heracles {
 			glfwGetCursorPos(window, &x, &y);
 			const int half_width = win_width_ / 2;
 			const int half_height = win_height_ / 2;
-			heracles::vec2 pos((x - half_width) / half_width, (-y + half_height) / half_height);
+			vec2 pos((x - half_width) / half_width, (-y + half_height) / half_height);
 			pos = projection_.inv() * pos + view_;
 
 			// 世界创造刚体
-			heracles::polygon_body::ptr body = the_world_->create_box(1, 10, 10, pos);
+			polygon_body::ptr body = the_world_->create_box(1, 10, 10, pos);
 			the_world_->add(body);
 
 			//绑定刚体的顶点属性
-			bind_vertex_array(*std::dynamic_pointer_cast<heracles::polygon_body>(body).get());
+			bind_vertex_array(*std::dynamic_pointer_cast<polygon_body>(body).get());
 
-			std::cout << "Box " << body->get_id() << ": [" << pos.x << " " << pos.y << "]" << std::endl;
+			std::cout << "Create Box " << body->get_id() << ": [" << pos.x << " " << pos.y << "]" << std::endl;
 		}
 
 									 // 鼠标右键给某个刚体施加力

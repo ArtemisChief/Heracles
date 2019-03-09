@@ -14,7 +14,6 @@ using namespace heracles;
 int main() {
 
 	game_renderer::init();
-
 	game_renderer::loop();
 
 	return 0;
