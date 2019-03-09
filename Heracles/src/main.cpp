@@ -12,12 +12,12 @@ static shader* shader_program = nullptr;
 static heracles::world the_world({ 0.0f, -9.8f });
 
 // 设置
-static constexpr int win_width = 800;
-static constexpr int win_height = 800;
+static int win_width = 1600;
+static int win_height = 900;
 // 视点向量与投影矩阵
 static float zoom = 0.0f;
 static heracles::vec2 view(0.0f, 0.0f);
-static heracles::mat22 projection(0.01f, 0, 0, 0.01f);
+static heracles::mat22 projection(8.0f / win_width, 0, 0, 8.0f / win_height);
 
 // 绘制刚体
 static void draw_body(heracles::polygon_body& body) {
@@ -102,15 +102,14 @@ static void move_camera(const heracles::vec2 translation) {
 // 鼠标按键回调函数
 static void mouse_callback(GLFWwindow* window, const int button, const int action, const int mods) {
 	if (action == GLFW_PRESS) switch (button) {
-	//鼠标左键放置刚体
+		//鼠标左键放置刚体
 	case GLFW_MOUSE_BUTTON_LEFT: {
 		double x, y;
 		glfwGetCursorPos(window, &x, &y);
-		heracles::vec2 pos(x, -y);
-		const heracles::vec2 offset(-400, 400);
-		pos = projection.inv() * ((offset + pos) / 400) + view;
-
-		std::cout << pos.x << " " << pos.y << std::endl;
+		const int half_width = win_width / 2;
+		const int half_height = win_height / 2;
+		heracles::vec2 pos((x - half_width) / half_width, (-y + half_height) / half_height);
+		pos = projection.inv() * pos + view;
 
 		// 世界创造刚体
 		heracles::polygon_body::ptr body = the_world.create_box(1, 10, 10, pos);
@@ -118,8 +117,9 @@ static void mouse_callback(GLFWwindow* window, const int button, const int actio
 
 		//绑定刚体的顶点属性
 		bind_vertex_array(*std::dynamic_pointer_cast<heracles::polygon_body>(body).get());
+		std::cout << "Box " << body->get_id() << ": [" << pos.x << " " << pos.y << "]" << std::endl;
 	}
-
+	
 	// 鼠标右键给某个刚体施加力
 	case GLFW_MOUSE_BUTTON_RIGHT: {
 		break;
@@ -131,8 +131,8 @@ static void mouse_callback(GLFWwindow* window, const int button, const int actio
 void scroll_callback(GLFWwindow* window, const double xoffset, const double yoffset) {
 	if (zoom >= -10.0f && zoom <= 25.0f) {
 		zoom += yoffset;
-		projection[0].x = 0.01f + zoom / 2000.0f;
-		projection[1].y = 0.01f + zoom / 2000.0f;
+		projection[0].x = 8.0f / win_width + zoom / (win_width * 2.5f);
+		projection[1].y = 8.0f / win_height + zoom / (win_height * 2.5f);
 		shader_program->set_mat22("projection", projection);
 	}
 	if (zoom <= -10.0f)
@@ -146,7 +146,11 @@ void processInput(GLFWwindow *window) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 
-	const float camera_speed = 2.0f;
+	auto camera_speed = 2.0f;
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+		camera_speed *= 3;
+	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+		camera_speed /= 3;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		move_camera(heracles::vec2(0, 1 * camera_speed));
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
@@ -166,10 +170,19 @@ static void heracles_run() {
 		auto dt = diff_time().count();
 
 		// 世界运行一个步长（Step）的运算
-		// world.Step(dt);
+		the_world.step(dt);
 	}
 }
 
+// 窗口大小调整时对视口（Viewport）进行调整的回调函数
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+	glViewport(0, 0, width, height);
+	win_width = width;
+	win_height = height;
+	projection[0].x = 8.0f / win_width + zoom / (win_width * 2.5f);
+	projection[1].y = 8.0f / win_height + zoom / (win_height * 2.5f);
+	shader_program->set_mat22("projection", projection);
+}
 
 int main() {
 	// glfw初始化
@@ -185,7 +198,11 @@ int main() {
 		return -1;
 	}
 	glfwMakeContextCurrent(window);
-	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+	// 设置鼠标回调函数
+	glfwSetMouseButtonCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
 
 	// glad加载OpenGL函数指针
 	if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
@@ -197,10 +214,6 @@ int main() {
 	shader_program->use();
 	shader_program->set_vec2("view", view);
 	shader_program->set_mat22("projection", projection);
-
-	// 设置鼠标回调函数
-	glfwSetMouseButtonCallback(window, mouse_callback);
-	glfwSetScrollCallback(window, scroll_callback);
 
 	// 渲染主循环
 	std::thread heracles_thread(heracles_run);
