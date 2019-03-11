@@ -70,22 +70,19 @@ namespace heracles {
 		// 创建纹理对象
 		texture texture;
 
+		int width, height, nr_channels;
+
 		// 读取图片时上下翻转
 		stbi_set_flip_vertically_on_load(true);
 
-		int width, height, nr_channels;
-
+		// 读取纹理图片
 		const auto data = stbi_load(file, &width, &height, &nr_channels, 0);
-		if (data) {
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-			glGenerateMipmap(GL_TEXTURE_2D);
-		}
-		else {
-			std::cout << "Failed to load texture" << std::endl;
-		}
 
 		// 生成纹理
-		texture.generate(width, height, data);
+		if (data)
+			texture.generate(width, height, data);
+		else
+			std::cout << "Failed to load texture" << std::endl;
 
 		// 释放图片数据
 		stbi_image_free(data);

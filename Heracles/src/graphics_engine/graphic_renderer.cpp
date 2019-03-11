@@ -30,7 +30,8 @@ namespace heracles {
 	void graphic_renderer::draw_body(polygon_body& body) {
 		resource_manager::get_shader("graphic").use().set_vec2("translation", body.get_world_position());
 		resource_manager::get_shader("graphic").set_mat22("rotation", body.get_rotation());
-		//glBindTexture(GL_TEXTURE_2D, texture);
+
+		//resource_manager::get_texture("test1").bind();
 		glBindVertexArray(*body.get_id());
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	}
@@ -51,7 +52,7 @@ namespace heracles {
 	auto graphic_renderer::diff_time() {
 		using namespace std::chrono;
 		using seconds = duration<double>;
-		static auto last_clock = high_resolution_clock::now();				// 每次调用high_resolution_clock::now()
+		static auto last_clock = high_resolution_clock::now();		// 每次调用high_resolution_clock::now()
 		const auto now = high_resolution_clock::now();				// 后一次一定比前一次大
 		const auto dt = duration_cast<seconds>(now - last_clock);	// 保证tick经过一个稳定的时间间隔
 		update_title(dt.count());									// 显示dt
@@ -63,6 +64,13 @@ namespace heracles {
 	void graphic_renderer::bind_vertex_array(polygon_body& body) {
 		auto vertices = body.get_vertices();
 
+		float tex_coord[] = {
+			0.0f, 0.0f,
+			0.0f, 1.0f,
+			1.0f, 0.0f,
+			1.0f, 1.0f
+		};
+
 		// 设置顶点数组，配置顶点数组对象（VAO）与顶点缓冲对象（VBO）
 		const auto vao = body.get_id();
 		unsigned int vbo;
@@ -73,19 +81,21 @@ namespace heracles {
 		glBindVertexArray(*vao);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 2 * vertices.size(), &vertices[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 16, nullptr, GL_STATIC_DRAW);
 
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
 		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<void*>(8 * sizeof(float)));
+		glEnableVertexAttribArray(1);
 
-		//glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), reinterpret_cast<void*>(2 * sizeof(float)));
-		//glEnableVertexAttribArray(1);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 8, &vertices[0]);
+		glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * 8, sizeof(float) * 8, tex_coord);
 
-		//// 加载纹理
-		//resource_manager::load_texture("src/resources/container.jpg", "test1");
+		// 加载纹理
+		resource_manager::load_texture("src/resources/container.jpg", "test1");
 	
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
+		//glBindBuffer(GL_ARRAY_BUFFER, 0);
+		//glBindVertexArray(0);
 	}
 
 	// 渲染
@@ -94,6 +104,8 @@ namespace heracles {
 
 		for (auto &body : the_world_->get_bodies())
 			draw_body(*std::dynamic_pointer_cast<polygon_body>(body).get());
+
+		text_->render_text("testeresresrerwrawrwarewae", 0.0f, 0.0f, 1.0f, 0.5f, 0.5f, 1.0f);
 
 		// glfw双缓冲+处理事件
 		glfwSwapBuffers(window_);
@@ -125,8 +137,6 @@ namespace heracles {
 			bind_vertex_array(*std::dynamic_pointer_cast<polygon_body>(body).get());
 
 			std::cout << "Create Box (" << body->get_id() << ") : [" << pos.x << " " << pos.y << "]" << std::endl;
-		
-			text_->render_text("testeresresrerwrawrwarewae", 0.0f, 0.0f, 1.0f, 0.5f, 0.5f, 1.0f);
 		}
 
 		// 鼠标右键给某个刚体施加力

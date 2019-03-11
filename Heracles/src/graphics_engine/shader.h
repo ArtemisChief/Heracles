@@ -13,8 +13,6 @@ namespace heracles {
 
 		GLint id;
 
-		shader() {}
-
 		// 使用着色器
 		shader& use();
 

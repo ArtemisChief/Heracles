@@ -12,7 +12,7 @@ namespace heracles {
 		this->width = width;
 		this->height = height;
 
-		// 创建材质
+		// 绑定材质
 		glBindTexture(GL_TEXTURE_2D, this->id);
 
 		// 设置纹理环绕方式
@@ -22,6 +22,9 @@ namespace heracles {
 		// 设置纹理过滤方式
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
 
 		// 解绑
 		glBindTexture(GL_TEXTURE_2D, 0);

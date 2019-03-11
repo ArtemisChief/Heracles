@@ -44,10 +44,10 @@ namespace heracles {
 		glUniform1f(glGetUniformLocation(this->id, name), value);
 	}
 	void shader::set_vec2(const GLchar *name, const vec2& value) const {
-		glUniform2fv(glGetUniformLocation(id, name), 1, &value[0]);
+		glUniform2fv(glGetUniformLocation(this->id, name), 1, &value[0]);
 	}
 	void shader::set_vec3(const GLchar *name, const GLfloat x, const GLfloat y, const GLfloat z) const {
-		glUniform3f(glGetUniformLocation(id, name), x, y, z);
+		glUniform3f(glGetUniformLocation(this->id, name), x, y, z);
 	}
 	void shader::set_mat22(const GLchar *name, const mat22& mat) const {
 		glUniformMatrix2fv(glGetUniformLocation(this->id, name), 1, GL_TRUE, &mat[0][0]);

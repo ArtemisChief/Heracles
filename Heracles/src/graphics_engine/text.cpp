@@ -10,7 +10,7 @@ namespace heracles {
 	text::text(const GLuint width, const GLuint height) {
 		// 读取并配置着色器
 		this->text_shader = resource_manager::load_shader("src/graphics_engine/shader/text.v", "src/graphics_engine/shader/text.f", "text");
-		this->text_shader.set_mat22("projection", mat22(8.0f / width, 0.0f, 0.0f, 8.0f / height));
+		this->text_shader.use().set_mat22("projection", mat22(8.0f / width, 0.0f, 0.0f, 8.0f / height));
 		this->text_shader.set_int("text", 0);
 
 		// 处理VAO与VBO
@@ -25,8 +25,8 @@ namespace heracles {
 		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
 		glEnableVertexAttribArray(0);
 
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
+		//glBindBuffer(GL_ARRAY_BUFFER, 0);
+		//glBindVertexArray(0);
 	}
 
 	void text::load(std::string font, const GLuint font_size) {
@@ -99,8 +99,9 @@ namespace heracles {
 
 	void text::render_text(std::string text, GLfloat x, const GLfloat y, const GLfloat scale, 
 						   const GLfloat r, const GLfloat g, const GLfloat b) {
+
 		this->text_shader.use().set_vec3("textColor", r, g, b);
-		glActiveTexture(GL_TEXTURE0);
+		//glActiveTexture(GL_TEXTURE0);
 		glBindVertexArray(this->vao_);
 
 		for (std::string::const_iterator c = text.begin(); c != text.end(); ++c) {
@@ -117,7 +118,7 @@ namespace heracles {
 				 xpos,     ypos,       0.0, 0.0 ,
 				 xpos,     ypos + h,   0.0, 1.0 ,
 				 xpos + w, ypos,       1.0, 0.0 ,
-				 xpos + w, ypos + h,   1.0, 1.0 ,
+				 xpos + w, ypos + h,   1.0, 1.0
 			};
 
 			glBindTexture(GL_TEXTURE_2D, ch.texture_id);
