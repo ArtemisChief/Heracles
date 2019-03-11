@@ -7,8 +7,8 @@ namespace heracles {
 		body::vertex_list vertices = {
 		vec2(-width / 2, -height / 2), vec2(0.0f, 0.0f), 	// Bottom Left
 		vec2( width / 2, -height / 2), vec2(1.0f, 0.0f),	// Bottom Right
-		vec2( width / 2,  height / 2), vec2(1.0f, 1.0f),	// Top Right
 		vec2(-width / 2,  height / 2), vec2(0.0f, 1.0f),	// Top Left
+		vec2( width / 2,  height / 2), vec2(1.0f, 1.0f),	// Top Right
 		};
 		auto body = std::make_shared<polygon_body>(0, mass, vertices);
 		body->set_world_position(world_position);

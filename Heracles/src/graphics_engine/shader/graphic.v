@@ -14,11 +14,11 @@ void main()
 {
 	gl_Position = mat4(vec4(projection[0], 0, 0),
 	                   vec4(projection[1], 0, 0),
-					   vec4(0, 0, 1, 0),
+					   vec4(0, 0, 0, 0),
 					   vec4(0, 0, 0, 1))
 				  * mat4(vec4(rotation[0], 0, 0),
 	                   vec4(rotation[1], 0, 0),
-					   vec4(0, 0, 1, 0),
+					   vec4(0, 0, 0, 0),
 					   vec4(translation - view, 0, 1))
 	              * vec4(aPos, 0, 1);
 

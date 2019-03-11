@@ -59,16 +59,16 @@
     <ClCompile Include="src\graphics_engine\resource_manager.cpp">
       <Filter>源文件\graphics_engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphics_engine\text_renderer.cpp">
-      <Filter>源文件\graphics_engine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\graphics_engine\game_renderer.cpp">
-      <Filter>源文件\graphics_engine</Filter>
-    </ClCompile>
     <ClCompile Include="src\graphics_engine\shader.cpp">
       <Filter>源文件\graphics_engine</Filter>
     </ClCompile>
     <ClCompile Include="src\graphics_engine\texture.cpp">
+      <Filter>源文件\graphics_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics_engine\text.cpp">
+      <Filter>源文件\graphics_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics_engine\graphic_renderer.cpp">
       <Filter>源文件\graphics_engine</Filter>
     </ClCompile>
   </ItemGroup>
@@ -94,24 +94,30 @@
     <ClInclude Include="src\graphics_engine\resource_manager.h">
       <Filter>头文件\graphics_engine</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphics_engine\text_renderer.h">
-      <Filter>头文件\graphics_engine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graphics_engine\game_renderer.h">
-      <Filter>头文件\graphics_engine</Filter>
-    </ClInclude>
     <ClInclude Include="src\graphics_engine\shader.h">
       <Filter>头文件\graphics_engine</Filter>
     </ClInclude>
     <ClInclude Include="src\graphics_engine\texture.h">
       <Filter>头文件\graphics_engine</Filter>
     </ClInclude>
+    <ClInclude Include="src\graphics_engine\text.h">
+      <Filter>头文件\graphics_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics_engine\graphic_renderer.h">
+      <Filter>头文件\graphics_engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\graphics_engine\shader\shader.f">
+    <None Include="src\graphics_engine\shader\text.f">
       <Filter>shader</Filter>
     </None>
-    <None Include="src\graphics_engine\shader\shader.v">
+    <None Include="src\graphics_engine\shader\text.v">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="src\graphics_engine\shader\graphic.f">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="src\graphics_engine\shader\graphic.v">
       <Filter>shader</Filter>
     </None>
   </ItemGroup>

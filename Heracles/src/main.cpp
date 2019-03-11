@@ -1,4 +1,4 @@
-#include "graphics_engine/game_renderer.h"
+#include "graphics_engine/graphic_renderer.h"
 
 /*
  * ¨€¨€¨[  ¨€¨€¨[¨€¨€¨€¨€¨€¨€¨€¨[¨€¨€¨€¨€¨€¨€¨[  ¨€¨€¨€¨€¨€¨[  ¨€¨€¨€¨€¨€¨€¨[¨€¨€¨[     ¨€¨€¨€¨€¨€¨€¨€¨[¨€¨€¨€¨€¨€¨€¨€¨[
@@ -13,8 +13,9 @@ using namespace heracles;
 
 int main() {
 
-	game_renderer::init();
-	game_renderer::loop();
+	graphic_renderer::init();
+
+	graphic_renderer::loop();
 
 	return 0;
 }

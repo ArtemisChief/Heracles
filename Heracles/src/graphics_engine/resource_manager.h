@@ -11,9 +11,9 @@ namespace heracles {
 
 	public:
 
-		static std::map<std::string, shader> shaders;
+		static std::map<std::string, shader> shaders_;
 
-		static std::map<std::string, texture> textures;
+		static std::map<std::string, texture> textures_;
 
 		static shader load_shader(const GLchar *v_shader_file, const GLchar *f_shader_file, const std::string name);
 

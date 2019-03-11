@@ -11,6 +11,7 @@ namespace heracles {
 
 	// 编译着色器
 	void shader::compile(const GLchar* vertex_source, const GLchar* fragment_source) {
+
 		// 顶点着色器
 		const auto vertex = glCreateShader(GL_VERTEX_SHADER);
 		glShaderSource(vertex, 1, &vertex_source, nullptr);
@@ -44,6 +45,9 @@ namespace heracles {
 	}
 	void shader::set_vec2(const GLchar *name, const vec2& value) const {
 		glUniform2fv(glGetUniformLocation(id, name), 1, &value[0]);
+	}
+	void shader::set_vec3(const GLchar *name, const GLfloat x, const GLfloat y, const GLfloat z) const {
+		glUniform3f(glGetUniformLocation(id, name), x, y, z);
 	}
 	void shader::set_mat22(const GLchar *name, const mat22& mat) const {
 		glUniformMatrix2fv(glGetUniformLocation(this->id, name), 1, GL_TRUE, &mat[0][0]);

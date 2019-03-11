@@ -24,6 +24,7 @@ namespace heracles {
 		void set_int(const GLchar *name, const GLint value) const;
 		void set_float(const GLchar *name, const GLfloat value) const;
 		void set_vec2(const GLchar *name, const vec2& value) const;
+		void set_vec3(const GLchar *name, const GLfloat x, const GLfloat y, const GLfloat z) const;
 		void set_mat22(const GLchar *name, const mat22& mat) const;
 
 	private:

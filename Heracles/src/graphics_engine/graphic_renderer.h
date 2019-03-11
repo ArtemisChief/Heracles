@@ -8,10 +8,12 @@
 #include "../util/stb_image.h"
 #include "../physics_engine/body.h"
 #include "../physics_engine/world.h"
+#include "text.h"
 
 
 namespace heracles {
-	class game_renderer {
+
+	class graphic_renderer {
 
 		// 窗口
 		static GLFWwindow* window_;
@@ -19,19 +21,23 @@ namespace heracles {
 		// 着色器程序
 		static shader* shader_program_;
 
+		// 窗口大小初始设置
+		static GLint win_width_;
+		static GLint win_height_;
+
 		// 世界
 		static world* the_world_;
 
-		// 窗口大小初始设置
-		static int win_width_;
-		static int win_height_;
-
 		// 视点向量与投影矩阵
-		static float zoom_;
+		static GLfloat zoom_;
 		static vec2 view_;
 		static mat22 projection_;
 
+		// 文字渲染器
+		static text* text_;
+
 	public:
+
 		// 绘制刚体
 		static void draw_body(polygon_body& body);
 
@@ -60,7 +66,7 @@ namespace heracles {
 		static void scroll_callback(GLFWwindow* window, const double xoffset, const double yoffset);
 
 		// 处理输入
-		static void process_input(GLFWwindow *window);
+		static void process_input();
 
 		// 窗口大小调整时对视口（Viewport）进行调整的回调函数
 		static void framebuffer_size_callback(GLFWwindow* window, const int width, const int height);
