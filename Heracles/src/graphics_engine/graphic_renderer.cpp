@@ -92,20 +92,20 @@ namespace heracles {
 		glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * 8, sizeof(float) * 8, tex_coord);
 
 		// 加载纹理
-		resource_manager::load_texture("src/resources/container.jpg", "test1");
+		//resource_manager::load_texture("src/resources/container.jpg", "test1");
 	
 		//glBindBuffer(GL_ARRAY_BUFFER, 0);
 		//glBindVertexArray(0);
 	}
 
-	// 渲染
+	// 渲染 - 所有 OpenGL 绘制放在这里进行
 	void graphic_renderer::display() {
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		for (auto &body : the_world_->get_bodies())
 			draw_body(*std::dynamic_pointer_cast<polygon_body>(body).get());
 
-		text_->render_text("testeresresrerwrawrwarewae", 0.0f, 0.0f, 1.0f, 0.5f, 0.5f, 1.0f);
+		text_->render_text("Heracles", -780.0f, -430.0f, 1.0f, 1.0f, 1.0f, 1.0f);
 
 		// glfw双缓冲+处理事件
 		glfwSwapBuffers(window_);
@@ -231,16 +231,13 @@ namespace heracles {
 			return -2;
 		}
 
-		// 开启面剔除
-		glEnable(GL_CULL_FACE);
-
 		// 开启混合
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		// 加载字体
 		text_ = new text(win_width_, win_height_);
-		text_->load("src/resources/consola.ttf", 24);
+		text_->load("src/resources/consola.ttf", 48);
 
 		// 构造并使用点着色器和片段着色器
 		resource_manager::load_shader("src/graphics_engine/shader/graphic.v", "src/graphics_engine/shader/graphic.f", "graphic");
@@ -260,7 +257,7 @@ namespace heracles {
 		std::thread heracles_thread(heracles_run);
 
 		while (!glfwWindowShouldClose(window_)) {
-			process_input();	// 处理输入
+			process_input();		// 处理输入
 			display();				// 显示图像
 			glfwPollEvents();		// 处理事件
 		}
