@@ -2,6 +2,7 @@
 #include "../util/math.h"
 #include <vector>
 #include "body.h"
+#include <mutex>
 
 namespace heracles {
 
@@ -18,12 +19,17 @@ namespace heracles {
 
 		void clear();
 		void step(float dt);	//世界处理一次运算
+		void lock();
+		void unlock();
 
 		void add(const body::ptr body);
 		const vec2& get_g() const;
 		const body_list& get_bodies() const;
 
 	private:
+
+		std::mutex mutex_;
+
 		vec2 g_;	//重力加速度
 		body_list bodies_;
 	};

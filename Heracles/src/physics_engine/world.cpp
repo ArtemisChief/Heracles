@@ -15,13 +15,17 @@ namespace heracles {
 		return body;
 	}
 
-	void world::clear() {
-		bodies_.clear();
-	}
+	void world::clear() { bodies_.clear(); }
 
 	void world::step(float dt) {
-
+		for (auto& body : bodies_)
+			body->update_force(g_, dt);
 	}
+
+	void world::lock() { mutex_.lock(); }
+
+	void world::unlock() { mutex_.unlock(); }
+
 	void world::add(const body::ptr body) { bodies_.push_back(body); }
 
 	const world::body_list& world::get_bodies() const { return bodies_; }

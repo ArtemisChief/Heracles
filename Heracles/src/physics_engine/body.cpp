@@ -11,13 +11,13 @@ namespace heracles {
 		angular_velocity_ += inv_inertia_ * cross(r, impulse);
 	}
 
-	void body::update_force(const vec2& g, float dt) {
+	void body::update_force(const vec2& g, const float dt) {
 		if (mass_ == inf)
 			return;
 		velocity_ += (g + force_ * inv_mass_) * dt;
-		angular_velocity_ += (torque_*inv_inertia_)*dt;
+		//angular_velocity_ += (torque_*inv_inertia_)*dt;
 		world_position_ += velocity_ * dt;
-		rotation_ = mat22(angular_velocity_*dt)*rotation_;
+		//rotation_ = mat22(angular_velocity_*dt)*rotation_;
 	}
 
 	unsigned int* body::get_id() { return &id_; }
@@ -45,8 +45,9 @@ namespace heracles {
 	void body::set_torque(const float torque) { torque_ = torque; }
 	void body::set_friction(const float friction) { friction_ = friction; }
 
-	polygon_body::polygon_body(uint16_t id, float mass, const vertex_list vertices) :body(id, mass), vertices_(vertices) {
+	polygon_body::polygon_body(const uint16_t id, const float mass, const vertex_list vertices) :body(id, mass), vertices_(vertices) {
 		//todo 计算转动惯量并赋值
+
 	}
 
 	size_t polygon_body::count() const { return vertices_.size(); }

@@ -31,7 +31,7 @@ namespace heracles {
 
 		bool can_collide(const body& other) const;					// 是否可以发生碰撞（如刚体和地面返回false）
 		void update_impulse(const vec2& impulse, const vec2& r);	// 更新动量
-		void update_force(const vec2& g, float dt);					// 更新力
+		void update_force(const vec2& g, const float dt);					// 更新力
 
 		unsigned int* get_id();
 		float get_mass() const;
@@ -67,7 +67,7 @@ namespace heracles {
 	public:
 		using ptr = std::shared_ptr < polygon_body >;
 
-		polygon_body(uint16_t id, float mass, const vertex_list vertices);
+		polygon_body(const uint16_t id, const float mass, const vertex_list vertices);
 
 		size_t count() const;
 		vec2 operator[](size_t idx) const;

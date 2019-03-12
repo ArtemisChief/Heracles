@@ -102,10 +102,12 @@ namespace heracles {
 	void graphic_renderer::display() {
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		the_world_->lock();
 		for (auto &body : the_world_->get_bodies())
 			draw_body(*std::dynamic_pointer_cast<polygon_body>(body).get());
 
 		text_->render_text("Heracles", -780.0f, -430.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		the_world_->unlock();
 
 		// glfw双缓冲+处理事件
 		glfwSwapBuffers(window_);
@@ -130,8 +132,10 @@ namespace heracles {
 			pos = projection_.inv() * pos + view_;
 
 			// 世界创造刚体
+			the_world_->lock();
 			auto body = the_world_->create_box(1, 10, 10, pos);
 			the_world_->add(body);
+			the_world_->unlock();
 
 			//绑定刚体的顶点属性
 			bind_vertex_array(*std::dynamic_pointer_cast<polygon_body>(body).get());
@@ -201,7 +205,9 @@ namespace heracles {
 			auto dt = diff_time().count();
 
 			// 世界运行一个步长（Step）的运算
+			the_world_->lock();
 			the_world_->step(dt);
+			the_world_->unlock();
 		}
 	}
 
