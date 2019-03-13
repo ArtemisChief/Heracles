@@ -61,7 +61,7 @@ namespace heracles {
 
 		//resource_manager::get_texture("test1").bind();
 		glBindVertexArray(*body.get_id());
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
 	}
 

@@ -3,11 +3,13 @@
 #include <vector>
 #include "body.h"
 #include <mutex>
+#include <map>
 
 namespace heracles {
 
 	class world {
 	public:
+
 		using body_list = std::vector<body::ptr>;
 
 		world(const vec2& g);
@@ -25,8 +27,6 @@ namespace heracles {
 		const body_list& get_bodies() const;
 
 	private:
-
-		std::mutex mutex_;
 
 		vec2 g_;	//重力加速度
 		body_list bodies_;

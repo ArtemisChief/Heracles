@@ -56,4 +56,8 @@ Simple 2D Physics Engine
 
 5. Math
    
-   https://www.cnblogs.com/xiexinxinlove/p/3708147.html
+   多边形计算面积：https://www.cnblogs.com/xiexinxinlove/p/3708147.html
+
+   多边形计算质心：https://blog.csdn.net/nhl19961226/article/details/68941585
+
+6. Physics

@@ -45,6 +45,35 @@ namespace heracles {
 	void body::set_torque(const float torque) { torque_ = torque; }
 	void body::set_friction(const float friction) { friction_ = friction; }
 
+	// 用向量叉乘算多边形面积
+	static float calculate_area(const std::vector<vec2> &vertices) {
+		float area = 0;
+		const auto size = vertices.size();
+
+		for (size_t i = 0; i < size; ++i) {
+			auto j = (i + 1) % size;
+			area += cross(vertices[i], vertices[j]);
+		}
+		return area / 2.0f;
+	}
+
+	// 计算多边形质心
+	static vec2 calculate_centroid(const std::vector<vec2> &vertices) {
+		vec2 centroid;
+		const auto size = vertices.size();
+
+		for (size_t i = 0; i < size; ++i) {
+			auto j = (i + 1) % size;
+			centroid += (vertices[i] + vertices[j]) * cross(vertices[i], vertices[j]);
+		}
+		return centroid / 6.0f / calculate_area(vertices);
+	}
+
+	// 计算多边形转动惯量
+	static float calculate_inertia(const float mass, const body::vertex_list &vertices) {
+
+	}
+
 	polygon_body::polygon_body(const uint16_t id, const float mass, const vertex_list vertices) :body(id, mass), vertices_(vertices) {
 		//todo 计算转动惯量并赋值
 
