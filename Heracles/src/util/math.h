@@ -65,11 +65,11 @@ namespace heracles {
 		}
 
 		vec2 operator-() const {
-			return { -x,-y };
+			return { -x, -y };
 		}
 
 		float magnitude() const {
-			return sqrt(x*x + y * y);
+			return sqrt(x * x + y * y);
 		}
 
 		vec2 normal() const {

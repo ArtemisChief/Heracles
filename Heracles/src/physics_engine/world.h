@@ -19,8 +19,6 @@ namespace heracles {
 
 		void clear();
 		void step(float dt);	//世界处理一次运算
-		void lock();
-		void unlock();
 
 		void add(const body::ptr body);
 		const vec2& get_g() const;

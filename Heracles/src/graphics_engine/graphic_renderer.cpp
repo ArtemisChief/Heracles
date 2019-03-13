@@ -22,7 +22,7 @@ namespace heracles {
 	// 视点向量与投影矩阵
 	GLfloat graphic_renderer::zoom_ = 0.0f;
 	vec2 graphic_renderer::view_(0.0f, 0.0f);
-	mat22 graphic_renderer::projection_(8.0f / win_width_, 0, 0, 8.0f / win_height_);
+	mat22 graphic_renderer::projection_(1000.0f / win_width_, 0, 0, 1000.0f / win_height_);
 
 	text* graphic_renderer::text_ = nullptr;
 
@@ -102,12 +102,11 @@ namespace heracles {
 	void graphic_renderer::display() {
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		the_world_->lock();
-		for (auto &body : the_world_->get_bodies())
+		for (auto &body : the_world_->get_bodies()) {
 			draw_body(*std::dynamic_pointer_cast<polygon_body>(body).get());
+		}
 
 		text_->render_text("Heracles", -780.0f, -430.0f, 1.0f, 1.0f, 1.0f, 1.0f);
-		the_world_->unlock();
 
 		// glfw双缓冲+处理事件
 		glfwSwapBuffers(window_);
@@ -132,10 +131,8 @@ namespace heracles {
 			pos = projection_.inv() * pos + view_;
 
 			// 世界创造刚体
-			the_world_->lock();
-			auto body = the_world_->create_box(1, 10, 10, pos);
+			auto body = the_world_->create_box(1, 0.1, 0.1, pos);
 			the_world_->add(body);
-			the_world_->unlock();
 
 			//绑定刚体的顶点属性
 			bind_vertex_array(*std::dynamic_pointer_cast<polygon_body>(body).get());
@@ -153,14 +150,14 @@ namespace heracles {
 
 	// 鼠标滚轮回调函数
 	void graphic_renderer::scroll_callback(GLFWwindow* window, const double xoffset, const double yoffset) {
-		if (zoom_ >= -10.0f && zoom_ <= 25.0f) {
+		if (zoom_ >= -20.0f && zoom_ <= 25.0f) {
 			zoom_ += yoffset;
-			projection_[0].x = 8.0f / win_width_ + zoom_ / (win_width_ * 2.5f);
-			projection_[1].y = 8.0f / win_height_ + zoom_ / (win_height_ * 2.5f);
+			projection_[0].x = 1000.0f / win_width_ + zoom_ * 40.0f / win_width_;
+			projection_[1].y = 1000.0f / win_height_ + zoom_ * 40.0f / win_height_;
 			resource_manager::get_shader("graphic").use().set_mat22("projection", projection_);
 		}
-		if (zoom_ <= -10.0f)
-			zoom_ = -10.0f;
+		if (zoom_ <= -20.0f)
+			zoom_ = -20.0f;
 		if (zoom_ >= 25.0f)
 			zoom_ = 25.0f;
 	}
@@ -171,11 +168,11 @@ namespace heracles {
 		if (glfwGetKey(window_, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			glfwSetWindowShouldClose(window_, true);
 
-		auto camera_speed = 2.0f;
+		auto camera_speed = 0.02f;
 		if (glfwGetKey(window_, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-			camera_speed *= 3;
+			camera_speed *= 8;
 		if (glfwGetKey(window_, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-			camera_speed /= 3;
+			camera_speed /= 4;
 		if (glfwGetKey(window_, GLFW_KEY_W) == GLFW_PRESS)
 			move_camera(vec2(0, 1 * camera_speed));
 		if (glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS)
@@ -191,8 +188,8 @@ namespace heracles {
 		glViewport(0, 0, width, height);
 		win_width_ = width;
 		win_height_ = height;
-		projection_[0].x = 8.0f / win_width_ + zoom_ / (win_width_ * 2.5f);
-		projection_[1].y = 8.0f / win_height_ + zoom_ / (win_height_ * 2.5f);
+		projection_[0].x = 1000.0f / win_width_ + zoom_ * 40.0f / win_width_;
+		projection_[1].y = 1000.0f / win_height_ + zoom_ * 40.0f / win_height_;
 		resource_manager::get_shader("graphic").use().set_mat22("projection", projection_);
 	}
 
@@ -205,9 +202,7 @@ namespace heracles {
 			auto dt = diff_time().count();
 
 			// 世界运行一个步长（Step）的运算
-			the_world_->lock();
 			the_world_->step(dt);
-			the_world_->unlock();
 		}
 	}
 
