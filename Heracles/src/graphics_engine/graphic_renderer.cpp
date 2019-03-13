@@ -10,7 +10,7 @@ namespace heracles {
 	GLFWwindow* graphic_renderer::window_ = nullptr;
 
 	// 着色器程序
-	shader* graphic_renderer::shader_program_ = nullptr;
+	shader graphic_renderer::shader_program_;
 
 	// 世界
 	world* graphic_renderer::the_world_ = nullptr;
@@ -26,26 +26,38 @@ namespace heracles {
 
 	text* graphic_renderer::text_ = nullptr;
 
+	// 切换/设置着色器
+	void graphic_renderer::set_shader(const char* s, const char* v_name, const vec2 v, const char* m_name, const mat22 m)
+	{
+		const auto temp = resource_manager::get_shader(s);
+
+		if (shader_program_.id != temp.id) {
+			shader_program_ = temp;
+			shader_program_.use();
+		}
+
+		shader_program_.use().set_vec2(v_name, v);
+		shader_program_.set_mat22(m_name, m);
+	}
+
+
 	// 绘制文字
 	void graphic_renderer::draw_text(const bool is_screen, const std::string text, 
 									 const GLfloat xpos, const GLfloat ypos, GLfloat const scale, 
 									 const GLfloat r, const GLfloat g, const GLfloat b) {
 		if (is_screen) {
-			text_->text_shader.use().set_vec2("view", vec2(0.0f, 0.0f));
-			text_->text_shader.set_mat22("projection", mat22(2.0f / win_width_, 0.0f, 0.0f, 2.0f / win_height_));
+			set_shader("text", "view", vec2(0.0f, 0.0f), "projection", mat22(2.0f / win_width_, 0.0f, 0.0f, 2.0f / win_height_));
 			text_->render_text(text, xpos, ypos, scale, r, g, b);
 		}
 		else {
-			text_->text_shader.use().set_vec2("view", view_);
-			text_->text_shader.set_mat22("projection", projection_);
+			set_shader("text", "view", view_, "projection", projection_);
 			text_->render_text(text, xpos, ypos, scale / 1000.0f, r, g, b);
 		}
 	}
 
 	// 绘制刚体
 	void graphic_renderer::draw_body(polygon_body& body) {
-		resource_manager::get_shader("graphic").use().set_vec2("translation", body.get_world_position());
-		resource_manager::get_shader("graphic").set_mat22("rotation", body.get_rotation());
+		set_shader("graphic", "translation", body.get_world_position(), "rotation", body.get_rotation());
 
 		//resource_manager::get_texture("test1").bind();
 		glBindVertexArray(*body.get_id());
@@ -118,20 +130,16 @@ namespace heracles {
 	// 渲染 - 所有 OpenGL 绘制放在这里进行
 	void graphic_renderer::display() {
 		glClear(GL_COLOR_BUFFER_BIT);
-
+		
 		for (auto &body : the_world_->get_bodies()) {
 			draw_body(*std::dynamic_pointer_cast<polygon_body>(body).get());
 
-			draw_text(false, std::string("World Pos X: ").append(std::to_string(body->get_world_position().x)),
-					  body->get_world_position().x + 0.1f, body->get_world_position().y + 0.05f, 1.0f,
-					  1.0f, 1.0f, 1.0f);
-
-			draw_text(false, std::string("World Pos Y: ").append(std::to_string(body->get_world_position().y)),
-					  body->get_world_position().x + 0.1f, body->get_world_position().y, 1.0f,
-					  1.0f, 1.0f, 1.0f);
-
-			draw_text(false, std::string("Velocity: ").append(std::to_string(body->get_velocity().magnitude())),
-					  body->get_world_position().x + 0.1f, body->get_world_position().y - 0.05f, 1.0f,
+			draw_text(false, std::string("   World Pos:").append
+					(std::to_string(body->get_world_position().x).append
+					(std::string(", ").append
+					(std::to_string(body->get_world_position().y)).append
+					(std::string("  Velocity: ").append(std::to_string(body->get_velocity().magnitude()))))),
+					  body->get_world_position().x, body->get_world_position().y, 1.0f,
 					  1.0f, 1.0f, 1.0f);
 		}
 
@@ -215,7 +223,6 @@ namespace heracles {
 
 	// 处理输入
 	void graphic_renderer::process_input() {
-
 		if (glfwGetKey(window_, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			glfwSetWindowShouldClose(window_, true);
 

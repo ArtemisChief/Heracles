@@ -19,7 +19,7 @@ namespace heracles {
 		static GLFWwindow* window_;
 
 		// 着色器程序
-		static shader* shader_program_;
+		static shader shader_program_;
 
 		// 窗口大小初始设置
 		static GLint win_width_;
@@ -37,6 +37,9 @@ namespace heracles {
 		static text* text_;
 
 	public:
+
+		// 切换/设置着色器
+		static void set_shader(const char* s, const char* v_name, const vec2 v, const char* m_name, const mat22 m);
 
 		// 绘制文字
 		static void draw_text(const bool is_screen, const std::string text, 
