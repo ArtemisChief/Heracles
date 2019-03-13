@@ -10,7 +10,8 @@ namespace heracles {
 	text::text(const GLuint width, const GLuint height) {
 		// 读取并配置着色器
 		this->text_shader = resource_manager::load_shader("src/graphics_engine/shader/text.v", "src/graphics_engine/shader/text.f", "text");
-		this->text_shader.use().set_mat22("projection", mat22(2.0f / width, 0.0f, 0.0f, -2.0f / height));
+		this->text_shader.use().set_vec2("view", vec2(0.0f, 0.0f));
+		this->text_shader.set_mat22("projection", mat22(2.0f / width, 0.0f, 0.0f, 2.0f / height));
 		this->text_shader.set_vec3("textColor", 1.0f, 1.0f, 1.0f);
 		this->text_shader.set_int("text", 0);
 
@@ -109,17 +110,17 @@ namespace heracles {
 			const auto ch = characters[*c];
 
 			const auto xpos = x + ch.bearing_x * scale;
-			const auto ypos = y + (this->characters['H'].bearing_y - ch.bearing_y) * scale;
+			const auto ypos = y - (ch.size_y - ch.bearing_y) * scale;
 
 			const auto w = ch.size_x * scale;
 			const auto h = ch.size_y * scale;
 
 			// 对每个字符更新VBO
 			GLfloat vertices[16] = {
-				 xpos,     ypos,       0.0, 0.0 ,
-				 xpos,     ypos + h,   0.0, 1.0 ,
-				 xpos + w, ypos,       1.0, 0.0 ,
-				 xpos + w, ypos + h,   1.0, 1.0
+				 xpos,     ypos,       0.0, 1.0 ,
+				 xpos,     ypos + h,   0.0, 0.0 ,
+				 xpos + w, ypos,       1.0, 1.0 ,
+				 xpos + w, ypos + h,   1.0, 0.0
 			};
 
 			glBindTexture(GL_TEXTURE_2D, ch.texture_id);

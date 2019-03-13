@@ -26,6 +26,22 @@ namespace heracles {
 
 	text* graphic_renderer::text_ = nullptr;
 
+	// 绘制文字
+	void graphic_renderer::draw_text(const bool is_screen, const std::string text, 
+									 const GLfloat xpos, const GLfloat ypos, GLfloat const scale, 
+									 const GLfloat r, const GLfloat g, const GLfloat b) {
+		if (is_screen) {
+			text_->text_shader.use().set_vec2("view", vec2(0.0f, 0.0f));
+			text_->text_shader.set_mat22("projection", mat22(2.0f / win_width_, 0.0f, 0.0f, 2.0f / win_height_));
+			text_->render_text(text, xpos, ypos, scale, r, g, b);
+		}
+		else {
+			text_->text_shader.use().set_vec2("view", view_);
+			text_->text_shader.set_mat22("projection", projection_);
+			text_->render_text(text, xpos, ypos, scale / 1000.0f, r, g, b);
+		}
+	}
+
 	// 绘制刚体
 	void graphic_renderer::draw_body(polygon_body& body) {
 		resource_manager::get_shader("graphic").use().set_vec2("translation", body.get_world_position());
@@ -34,6 +50,7 @@ namespace heracles {
 		//resource_manager::get_texture("test1").bind();
 		glBindVertexArray(*body.get_id());
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
 	}
 
 	// 绘制铰链
@@ -104,12 +121,40 @@ namespace heracles {
 
 		for (auto &body : the_world_->get_bodies()) {
 			draw_body(*std::dynamic_pointer_cast<polygon_body>(body).get());
+
+			draw_text(false, std::string("World Pos X: ").append(std::to_string(body->get_world_position().x)),
+					  body->get_world_position().x + 0.1f, body->get_world_position().y + 0.05f, 1.0f,
+					  1.0f, 1.0f, 1.0f);
+
+			draw_text(false, std::string("World Pos Y: ").append(std::to_string(body->get_world_position().y)),
+					  body->get_world_position().x + 0.1f, body->get_world_position().y, 1.0f,
+					  1.0f, 1.0f, 1.0f);
+
+			draw_text(false, std::string("Velocity: ").append(std::to_string(body->get_velocity().magnitude())),
+					  body->get_world_position().x + 0.1f, body->get_world_position().y - 0.05f, 1.0f,
+					  1.0f, 1.0f, 1.0f);
 		}
 
-		text_->render_text("Heracles", -780.0f, -430.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		draw_text(true, "Heracles", -780.0f, 400.0f, 1.0f, 1.0f, 1.0f, 1.0f);
 
 		// glfw双缓冲+处理事件
 		glfwSwapBuffers(window_);
+	}
+
+	// 物理引擎运行部分
+	static std::atomic<bool> is_paused{ false };
+	static std::atomic<bool> should_stop{ false };
+	void graphic_renderer::heracles_run() {
+		using namespace std::chrono_literals;
+		while (!should_stop) {
+			std::this_thread::sleep_for(10ms);
+			auto dt = diff_time().count();
+
+			if (!is_paused) {
+				// 世界运行一个步长（Step）的运算
+				the_world_->step(dt);
+			}
+		}
 	}
 
 	// 摄像机移动
@@ -162,6 +207,12 @@ namespace heracles {
 			zoom_ = 25.0f;
 	}
 
+	// 键盘按键回调函数
+	void graphic_renderer::keyboard_callback(GLFWwindow* window, const int key, const int scancode, const int action, const int mods) {
+		if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+			is_paused = !is_paused;
+	}
+
 	// 处理输入
 	void graphic_renderer::process_input() {
 
@@ -193,18 +244,7 @@ namespace heracles {
 		resource_manager::get_shader("graphic").use().set_mat22("projection", projection_);
 	}
 
-	// 物理引擎运行部分
-	static std::atomic<bool> should_stop{ false };
-	void graphic_renderer::heracles_run() {
-		using namespace std::chrono_literals;
-		while (!should_stop) {
-			std::this_thread::sleep_for(10ms);
-			auto dt = diff_time().count();
 
-			// 世界运行一个步长（Step）的运算
-			the_world_->step(dt);
-		}
-	}
 
 	// 初始化
 	int graphic_renderer::init() {
@@ -223,9 +263,10 @@ namespace heracles {
 		glfwMakeContextCurrent(window_);
 		glfwSetFramebufferSizeCallback(window_, framebuffer_size_callback);
 
-		// 设置鼠标回调函数
+		// 设置回调函数
 		glfwSetMouseButtonCallback(window_, mouse_callback);
 		glfwSetScrollCallback(window_, scroll_callback);
+		glfwSetKeyCallback(window_, keyboard_callback);
 
 		// glad加载OpenGL函数指针
 		if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {

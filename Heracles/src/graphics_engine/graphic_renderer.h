@@ -38,6 +38,11 @@ namespace heracles {
 
 	public:
 
+		// 绘制文字
+		static void draw_text(const bool is_screen, const std::string text, 
+							  const GLfloat xpos, const GLfloat ypos, const GLfloat scale, 
+							  const GLfloat r, const GLfloat g, const GLfloat b);
+
 		// 绘制刚体
 		static void draw_body(polygon_body& body);
 
@@ -56,6 +61,9 @@ namespace heracles {
 		// 渲染
 		static void display();
 
+		// 物理引擎部分
+		static void heracles_run();
+
 		// 摄像机移动
 		static void move_camera(const vec2 translation);
 
@@ -65,14 +73,14 @@ namespace heracles {
 		// 鼠标滚轮回调函数
 		static void scroll_callback(GLFWwindow* window, const double xoffset, const double yoffset);
 
+		// 键盘按键回调函数
+		static void keyboard_callback(GLFWwindow* window, const int key, const int scancode, const int action, const int mods);
+
 		// 处理输入
 		static void process_input();
 
 		// 窗口大小调整时对视口（Viewport）进行调整的回调函数
 		static void framebuffer_size_callback(GLFWwindow* window, const int width, const int height);
-
-		// 物理引擎部分
-		static void heracles_run();
 
 		// 初始化
 		static int init();

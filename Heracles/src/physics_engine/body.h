@@ -73,7 +73,7 @@ namespace heracles {
 		vec2 operator[](size_t idx) const;
 		vec2 edge(size_t idx) const;
 
-		vertex_list get_vertices() const;;
+		vertex_list get_vertices() const;
 
 		/* 分离轴定理（SAT）
 		 * 检测两凸多边形是否相交
