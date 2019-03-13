@@ -4,9 +4,15 @@ Simple 2D Physics Engine
 
 ## Collaborators
 
-[ctwDuyh](https://github.com/ctwDuyh)  
+[AsrielMao](https://github.com/AsrielMao)
 
 [callMeBigBen](https://github.com/callMeBigBen)
+
+[ctwDuyh](https://github.com/ctwDuyh) 
+
+[FantasyD](https://github.com/FantasyD)
+
+[HeronZhao](https://github.com/HeronZhao)
 
 [MrZse](https://github.com/MrZse)
 
@@ -47,3 +53,7 @@ Simple 2D Physics Engine
    https://blog.csdn.net/yorhomwang/article/details/54869018
 
    https://blog.csdn.net/qq_34594236/article/details/54015585
+
+5. Math
+   
+   https://www.cnblogs.com/xiexinxinlove/p/3708147.html
