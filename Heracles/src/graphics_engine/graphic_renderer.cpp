@@ -134,16 +134,16 @@ namespace heracles {
 		for (auto &body : the_world_->get_bodies()) {
 			draw_body(*std::dynamic_pointer_cast<polygon_body>(body).get());
 
-			draw_text(false, std::string("   World Pos:").append
-					(std::to_string(body->get_world_position().x).append
-					(std::string(", ").append
-					(std::to_string(body->get_world_position().y)).append
-					(std::string("  Velocity: ").append(std::to_string(body->get_velocity().magnitude()))))),
-					  body->get_world_position().x, body->get_world_position().y, 1.0f,
-					  1.0f, 1.0f, 1.0f);
+			//draw_text(false, std::string("   World Pos:").append
+			//		(std::to_string(body->get_world_position().x).append
+			//		(std::string(", ").append
+			//		(std::to_string(body->get_world_position().y)).append
+			//		(std::string("  Velocity: ").append(std::to_string(body->get_velocity().magnitude()))))),
+			//		  body->get_world_position().x, body->get_world_position().y, 1.0f,
+			//		  1.0f, 1.0f, 1.0f);
 		}
 
-		draw_text(true, "Heracles", -780.0f, 400.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		draw_text(true, "Heracles", (-win_width_+30.0f)/2.0f, (win_height_-100.0f)/2.0f, 1.0f, 1.0f, 1.0f, 1.0f);
 
 		// glfw双缓冲+处理事件
 		glfwSwapBuffers(window_);
@@ -225,6 +225,23 @@ namespace heracles {
 	void graphic_renderer::process_input() {
 		if (glfwGetKey(window_, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			glfwSetWindowShouldClose(window_, true);
+
+		//if(glfwGetMouseButton(window_,GLFW_MOUSE_BUTTON_LEFT)==GLFW_PRESS)
+		//{
+		//	double x, y;
+		//	glfwGetCursorPos(window_, &x, &y);
+		//	const auto half_width = win_width_ / 2;
+		//	const auto half_height = win_height_ / 2;
+		//	vec2 pos((x - half_width) / half_width, (-y + half_height) / half_height);
+		//	pos = projection_.inv() * pos + view_;
+
+		//	// 世界创造刚体
+		//	auto body = the_world_->create_box(1, 0.1, 0.1, pos);
+		//	the_world_->add(body);
+
+		//	//绑定刚体的顶点属性
+		//	bind_vertex_array(*std::dynamic_pointer_cast<polygon_body>(body).get());
+		//}
 
 		auto camera_speed = 0.02f;
 		if (glfwGetKey(window_, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)

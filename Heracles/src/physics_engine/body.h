@@ -52,6 +52,7 @@ namespace heracles {
 		void set_centroid(const vec2& centroid);
 		void set_world_position(const vec2& world_position);
 		void set_rotation(const mat22& rotation);
+		void set_rotation(const float angle);
 		void set_velocity(const vec2& velocity);
 		void set_angular_velocity(const float angular_velocity);
 		void set_force(const vec2& force);

@@ -39,6 +39,7 @@ namespace heracles {
 	void body::set_centroid(const vec2& centroid) { centroid_ = centroid; }
 	void body::set_world_position(const vec2& world_position) { world_position_ = world_position; }
 	void body::set_rotation(const mat22& rotation) { rotation_ = rotation; }
+	void body::set_rotation(const float angle) { set_rotation(mat22(angle)); }
 	void body::set_velocity(const vec2& velocity) { velocity_ = velocity; }
 	void body::set_angular_velocity(const float angular_velocity) { angular_velocity_ = angular_velocity; }
 	void body::set_force(const vec2& force) { force_ = force; }
@@ -71,12 +72,21 @@ namespace heracles {
 
 	// 计算多边形转动惯量
 	static float calculate_inertia(const float mass, const body::vertex_list &vertices) {
-
+		float sum = 0, sum_area = 0;
+		const auto size = vertices.size();
+		for (size_t i = 0; i < size; ++i) {
+			const auto p0 = vertices[i];
+			const auto p1 = vertices[(i + 1) % size];
+			const auto area = abs(cross(p0, p1));
+			sum += area * (dot(p0, p0) + dot(p1, p1) + dot(p0, p1));
+			sum_area += area;
+		}
+		return mass / 6 * sum / sum_area;
 	}
 
 	polygon_body::polygon_body(const uint16_t id, const float mass, const vertex_list vertices) :body(id, mass), vertices_(vertices) {
-		//todo 计算转动惯量并赋值
-
+		set_centroid(calculate_centroid(vertices_));
+		set_inertia(calculate_inertia(mass, vertices_));
 	}
 
 	size_t polygon_body::count() const { return vertices_.size(); }
@@ -88,8 +98,21 @@ namespace heracles {
 	body::vertex_list polygon_body::get_vertices() const { return vertices_; }
 
 	float polygon_body::min_separating_axis(size_t &idx, const polygon_body &other) const {
-		//todo 完成SAT算法
-		return 0;
+		auto separation = -inf;
+		for (size_t i = 0; i < vertices_.size(); ++i) {
+			const auto va = world_position_ + (*this)[i];
+			const auto n = edge(i).normal();
+			auto min_sep = inf;
+			for (size_t j = 0; j < other.count(); ++j) {
+				const auto vb = other.world_position_ + other[j];
+				min_sep = std::min(min_sep, dot(vb - va, n));
+			}
+			if (min_sep > separation) {
+				separation = min_sep;
+				idx = i;
+			}
+		}
+		return separation; // 非负表示不相交
 	}
 
 }

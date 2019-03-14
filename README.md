@@ -48,6 +48,12 @@ Simple 2D Physics Engine
 
 4. Separating Axis Theorem (SAT) Explanation
    
+   http://www.metanetsoftware.com/technique/tutorialA.html
+
+   https://www.codeproject.com/Articles/15573/2D-Polygon-Collision-Detection
+
+   https://blog.csdn.net/cgcoder/article/details/7179575
+   
    http://www.sevenson.com.au/actionscript/sat/
 
    https://blog.csdn.net/yorhomwang/article/details/54869018
@@ -61,3 +67,5 @@ Simple 2D Physics Engine
    多边形计算质心：https://blog.csdn.net/nhl19961226/article/details/68941585
 
 6. Physics
+
+    多边形计算转动惯量：https://zh.wikipedia.org/wiki/%E8%BD%89%E5%8B%95%E6%85%A3%E9%87%8F%E5%88%97%E8%A1%A8
