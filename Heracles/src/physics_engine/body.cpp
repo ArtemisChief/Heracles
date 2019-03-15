@@ -56,9 +56,9 @@ namespace heracles {
 		if (mass_ == inf)
 			return;
 		velocity_ += (g + force_ * inv_mass_) * dt;
-		//angular_velocity_ += (torque_*inv_inertia_)*dt;
+		angular_velocity_ += torque_ * inv_inertia_ * dt;
 		world_position_ += velocity_ * dt;
-		//rotation_ = mat22(angular_velocity_*dt)*rotation_;
+		rotation_ = mat22(angular_velocity_ * dt) * rotation_;
 	}
 
 	unsigned int* body::get_id() { return &id_; }
@@ -144,11 +144,11 @@ namespace heracles {
 	float rigid_body::min_separating_axis(size_t &idx, const rigid_body &other) const {
 		auto separation = -inf;
 		for (size_t i = 0; i < vertices_->size(); ++i) {
-			const auto va = world_position_ + rotation_ * (*this)[i]  ;
+			const auto va = world_position_ + (*this)[i]  ;
 			const auto n = edge(i).normal();
 			auto min_sep = inf;
 			for (size_t j = 0; j < other.count(); ++j) {
-				const auto vb = other.world_position_ + other.rotation_ * other[j];
+				const auto vb = other.world_position_ + other[j];
 				min_sep = std::min(min_sep, dot(vb - va, n));
 			}
 			if (min_sep > separation) {

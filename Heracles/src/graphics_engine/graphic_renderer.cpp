@@ -194,16 +194,38 @@ namespace heracles {
 	}
 
 	// 鼠标按键回调函数
+	double x0, y0;
 	void graphic_renderer::mouse_callback(GLFWwindow* window, const int button, const int action, const int mods) {
+		
 		if (action == GLFW_PRESS) switch (button) {
-			//鼠标左键放置刚体
+		//鼠标左键放置刚体
 		case GLFW_MOUSE_BUTTON_LEFT: {
-			double x, y;
-			glfwGetCursorPos(window, &x, &y);
+			glfwGetCursorPos(window, &x0, &y0);
 			const auto half_width = win_width_ / 2.0f;
 			const auto half_height = win_height_ / 2.0f;
-			vec2 pos((x - half_width) / half_width, (-y + half_height) / half_height);
+			x0 = (x0 - half_width) / half_width;
+			y0 = (-y0 + half_height) / half_height;
+			std::cout << "MOUSE_BUTTON_LEFT Press" << std::endl;
+		}
+		// 鼠标右键给某个刚体施加力
+		case GLFW_MOUSE_BUTTON_RIGHT: {
+			break;
+		}
+		default:;
+		}
+
+		if (action == GLFW_RELEASE) switch (button) {
+		case GLFW_MOUSE_BUTTON_LEFT: {
+			double x1, y1;
+			glfwGetCursorPos(window, &x1, &y1);
+			const auto half_width = win_width_ / 2.0f;
+			const auto half_height = win_height_ / 2.0f;
+			x1 = (x1 - half_width) / half_width;
+			y1 = (-y1 + half_height) / half_height;
+			vec2 pos((x0 + x1) / 2.0f, (y0 + y1) / 2.0f);
+			vec2 width_height(abs(x1 - x0), abs(y1 - y0));
 			pos = projection_.inv() * pos + view_;
+			width_height = projection_.inv() * width_height;
 
 			rigid_body::ptr body;
 			// 世界创造刚体
@@ -211,28 +233,29 @@ namespace heracles {
 			case 0:
 				body = the_world_->create_point(pos);
 				break;
-			case 1:
-				body = the_world_->create_line(0.5f, pos);
+			case 1: 
+				body = the_world_->create_line(sqrt(width_height.x * width_height.x + width_height.y * width_height.y), pos);
+				body->set_rotation(atan((y1 - y0) / (x1 - x0) * win_height_ / win_width_));
 				break;
 			case 2:
-				body = the_world_->create_triangle(1.0f, 0.1f, 0.1f, pos);
+				body = the_world_->create_triangle(1.0f, width_height.x, width_height.y, pos);
 				break;
 			case 3:
-				body = the_world_->create_rectangle(1.0f, 0.1f, 0.1f, pos);
+				body = the_world_->create_rectangle(1.0f, width_height.x, width_height.y, pos);
 				break;
 			default:;
 			}
-			
+
 			the_world_->add(body);
 
 			std::cout << "Create Box (" << body->get_id() << ") : [" << pos.x << " " << pos.y << "]" << std::endl;
-		}
-
-		// 鼠标右键给某个刚体施加力
-		case GLFW_MOUSE_BUTTON_RIGHT: {
+			std::cout << "MOUSE_BUTTON_LEFT Release" << std::endl;
 			break;
 		}
-		default: ;
+		case GLFW_MOUSE_BUTTON_RIGHT:
+			break;
+		default:
+			break;
 		}
 	}
 

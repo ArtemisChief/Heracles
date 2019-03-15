@@ -16,7 +16,7 @@ namespace heracles {
 		float inv_inertia_;						// 转动惯量倒数
 		vec2  centroid_			{ 0, 0 };		// 质心
 		vec2  world_position_	{ 0, 0 };		// 世界坐标位置
-		mat22 rotation_			{ mat22::i };	// 旋转
+		mat22 rotation_			{ 1, 0, 0, 1 };	// 旋转
 		vec2  velocity_			{ 0, 0 };		// 速度
 		float angular_velocity_	{ 0 };			// 角速度
 		vec2  force_			{ 0, 0 };		// 受力
