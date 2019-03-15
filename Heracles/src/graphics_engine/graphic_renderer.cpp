@@ -3,8 +3,14 @@
 
 #include "graphic_renderer.h"
 #include "resource_manager.h"
+#include <cstdarg>
+#include <cstdarg>
+#include <cstdarg>
+#include <random>
 
 namespace heracles {
+
+	int type = 0;
 
 	// 窗口
 	GLFWwindow* graphic_renderer::window_ = nullptr;
@@ -27,17 +33,26 @@ namespace heracles {
 	text* graphic_renderer::text_ = nullptr;
 
 	// 切换/设置着色器
-	void graphic_renderer::set_shader(const char* s, const char* v_name, const vec2 v, const char* m_name, const mat22 m)
-	{
-		const auto temp = resource_manager::get_shader(s);
+	void graphic_renderer::set_shader(const char* shader_name, const char* name, const vec2 v) {
+		const auto temp = resource_manager::get_shader(shader_name);
 
 		if (shader_program_.id != temp.id) {
 			shader_program_ = temp;
 			shader_program_.use();
 		}
 
-		shader_program_.use().set_vec2(v_name, v);
-		shader_program_.set_mat22(m_name, m);
+		shader_program_.set_vec2(name, v);
+	}
+
+	void graphic_renderer::set_shader(const char* shader_name, const char* name, const mat22 m) {
+		const auto temp = resource_manager::get_shader(shader_name);
+
+		if (shader_program_.id != temp.id) {
+			shader_program_ = temp;
+			shader_program_.use();
+		}
+
+		shader_program_.set_mat22(name, m);
 	}
 
 
@@ -46,18 +61,22 @@ namespace heracles {
 									 const GLfloat xpos, const GLfloat ypos, GLfloat const scale, 
 									 const GLfloat r, const GLfloat g, const GLfloat b) {
 		if (is_screen) {
-			set_shader("text", "view", vec2(0.0f, 0.0f), "projection", mat22(2.0f / win_width_, 0.0f, 0.0f, 2.0f / win_height_));
+			set_shader("text", "view", vec2(0.0f, 0.0f));
+			set_shader("text", "projection", mat22(2.0f / win_width_, 0.0f, 0.0f, 2.0f / win_height_));
 			text_->render_text(text, xpos, ypos, scale, r, g, b);
 		}
 		else {
-			set_shader("text", "view", view_, "projection", projection_);
+			set_shader("text", "view", view_);
+			set_shader("text", "projection", projection_);
 			text_->render_text(text, xpos, ypos, scale / 1000.0f, r, g, b);
 		}
 	}
 
 	// 绘制刚体
-	void graphic_renderer::draw_body(polygon_body& body) {
-		set_shader("graphic", "translation", body.get_world_position(), "rotation", body.get_rotation());
+	void graphic_renderer::draw_body(rigid_body& body) {
+		set_shader("graphic", "translation", body.get_world_position());
+		set_shader("graphic", "rotation", body.get_rotation());
+		set_shader("graphic", "scale", body.get_scale());
 
 		//resource_manager::get_texture("test1").bind();
 		glBindVertexArray(*body.get_id());
@@ -89,42 +108,45 @@ namespace heracles {
 		return dt;
 	}
 
-	// 绑定刚体对象的顶点，新创建的刚体只需要调用一次该函数
-	void graphic_renderer::bind_vertex_array(polygon_body& body) {
-		auto vertices = body.get_vertices();
+	// 绑定刚体模板顶点
+	void graphic_renderer::bind_vertex_array() {
+		for (auto& map : body::type_map) {
+			auto vertices = body::template_map[map.first];
+			const auto size = sizeof(float) * vertices.size() * 2;
 
-		float tex_coord[] = {
-			0.0f, 0.0f,
-			0.0f, 1.0f,
-			1.0f, 0.0f,
-			1.0f, 1.0f
-		};
+			float tex_coord[] = {
+				0.0f, 0.0f,
+				0.0f, 1.0f,
+				1.0f, 0.0f,
+				1.0f, 1.0f
+			};
 
-		// 设置顶点数组，配置顶点数组对象（VAO）与顶点缓冲对象（VBO）
-		const auto vao = body.get_id();
-		unsigned int vbo;
-		glGenVertexArrays(1, vao);
-		glGenBuffers(1, &vbo);
+			// 设置顶点数组，配置顶点数组对象（VAO）与顶点缓冲对象（VBO）
+			auto& vao = map.second;
+			unsigned int vbo;
+			glGenVertexArrays(1, &vao);
+			glGenBuffers(1, &vbo);
 
-		// 处理顶点
-		glBindVertexArray(*vao);
+			// 处理顶点
+			glBindVertexArray(vao);
 
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 16, nullptr, GL_STATIC_DRAW);
+			glBindBuffer(GL_ARRAY_BUFFER, vbo);
+			glBufferData(GL_ARRAY_BUFFER, size * 2, nullptr, GL_STATIC_DRAW);
 
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<void*>(8 * sizeof(float)));
-		glEnableVertexAttribArray(1);
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<void*>(size));
+			glEnableVertexAttribArray(1);
 
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * 8, &vertices[0]);
-		glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * 8, sizeof(float) * 8, tex_coord);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, size, &vertices[0]);
+			glBufferSubData(GL_ARRAY_BUFFER, size, size, tex_coord);
 
-		// 加载纹理
-		//resource_manager::load_texture("src/resources/container.jpg", "test1");
-	
-		//glBindBuffer(GL_ARRAY_BUFFER, 0);
-		//glBindVertexArray(0);
+			// 加载纹理
+			//resource_manager::load_texture("src/resources/container.jpg", "test1");
+
+			//glBindBuffer(GL_ARRAY_BUFFER, 0);
+			//glBindVertexArray(0);
+		}
 	}
 
 	// 渲染 - 所有 OpenGL 绘制放在这里进行
@@ -132,7 +154,7 @@ namespace heracles {
 		glClear(GL_COLOR_BUFFER_BIT);
 		
 		for (auto &body : the_world_->get_bodies()) {
-			draw_body(*std::dynamic_pointer_cast<polygon_body>(body).get());
+			draw_body(*std::dynamic_pointer_cast<rigid_body>(body).get());
 
 			//draw_text(false, std::string("   World Pos:").append
 			//		(std::to_string(body->get_world_position().x).append
@@ -168,7 +190,7 @@ namespace heracles {
 	// 摄像机移动
 	void graphic_renderer::move_camera(const vec2 translation) {
 		view_ += translation;
-		resource_manager::get_shader("graphic").use().set_vec2("view", view_);
+		set_shader("graphic", "view", view_);
 	}
 
 	// 鼠标按键回调函数
@@ -178,17 +200,30 @@ namespace heracles {
 		case GLFW_MOUSE_BUTTON_LEFT: {
 			double x, y;
 			glfwGetCursorPos(window, &x, &y);
-			const auto half_width = win_width_ / 2;
-			const auto half_height = win_height_ / 2;
+			const auto half_width = win_width_ / 2.0f;
+			const auto half_height = win_height_ / 2.0f;
 			vec2 pos((x - half_width) / half_width, (-y + half_height) / half_height);
 			pos = projection_.inv() * pos + view_;
 
+			rigid_body::ptr body;
 			// 世界创造刚体
-			auto body = the_world_->create_box(1, 0.1, 0.1, pos);
+			switch (type) {
+			case 0:
+				body = the_world_->create_point(pos);
+				break;
+			case 1:
+				body = the_world_->create_line(0.5f, pos);
+				break;
+			case 2:
+				body = the_world_->create_triangle(1.0f, 0.1f, 0.1f, pos);
+				break;
+			case 3:
+				body = the_world_->create_rectangle(1.0f, 0.1f, 0.1f, pos);
+				break;
+			default:;
+			}
+			
 			the_world_->add(body);
-
-			//绑定刚体的顶点属性
-			bind_vertex_array(*std::dynamic_pointer_cast<polygon_body>(body).get());
 
 			std::cout << "Create Box (" << body->get_id() << ") : [" << pos.x << " " << pos.y << "]" << std::endl;
 		}
@@ -207,7 +242,7 @@ namespace heracles {
 			zoom_ += yoffset;
 			projection_[0].x = 1000.0f / win_width_ + zoom_ * 40.0f / win_width_;
 			projection_[1].y = 1000.0f / win_height_ + zoom_ * 40.0f / win_height_;
-			resource_manager::get_shader("graphic").use().set_mat22("projection", projection_);
+			set_shader("graphic", "projection", projection_);
 		}
 		if (zoom_ <= -20.0f)
 			zoom_ = -20.0f;
@@ -219,6 +254,9 @@ namespace heracles {
 	void graphic_renderer::keyboard_callback(GLFWwindow* window, const int key, const int scancode, const int action, const int mods) {
 		if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
 			is_paused = !is_paused;
+
+		if ((key == GLFW_KEY_1 || key == GLFW_KEY_2 || key == GLFW_KEY_3 || key == GLFW_KEY_4) && action == GLFW_PRESS)
+			type = key - 49;
 	}
 
 	// 处理输入
@@ -236,11 +274,8 @@ namespace heracles {
 		//	pos = projection_.inv() * pos + view_;
 
 		//	// 世界创造刚体
-		//	auto body = the_world_->create_box(1, 0.1, 0.1, pos);
+		//	const auto body = the_world_->create_rectangle(1, 0.1, 0.1, pos);
 		//	the_world_->add(body);
-
-		//	//绑定刚体的顶点属性
-		//	bind_vertex_array(*std::dynamic_pointer_cast<polygon_body>(body).get());
 		//}
 
 		auto camera_speed = 0.02f;
@@ -265,7 +300,7 @@ namespace heracles {
 		win_height_ = height;
 		projection_[0].x = 1000.0f / win_width_ + zoom_ * 40.0f / win_width_;
 		projection_[1].y = 1000.0f / win_height_ + zoom_ * 40.0f / win_height_;
-		resource_manager::get_shader("graphic").use().set_mat22("projection", projection_);
+		set_shader("graphic", "projection", projection_);
 	}
 
 
@@ -277,6 +312,10 @@ namespace heracles {
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+		// 多重采样抗锯齿倍数
+		glfwWindowHint(GLFW_SAMPLES, 4);
+		
 
 		// glfw窗口创建
 		window_ = glfwCreateWindow(win_width_, win_height_, "Heracles", nullptr, nullptr);
@@ -297,6 +336,9 @@ namespace heracles {
 			return -2;
 		}
 
+		// 开启多重采样抗锯齿
+		glEnable(GL_MULTISAMPLE);
+
 		// 开启混合
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -306,14 +348,21 @@ namespace heracles {
 		text_->load("src/resources/consola.ttf", 48);
 
 		// 构造并使用点着色器和片段着色器
-		resource_manager::load_shader("src/graphics_engine/shader/graphic.v", "src/graphics_engine/shader/graphic.f", "graphic");
-		resource_manager::get_shader("graphic").use().set_vec2("view", view_);
-		resource_manager::get_shader("graphic").set_mat22("projection", projection_);
+		resource_manager::load_shader("src/graphics_engine/shader/graphic.v", 
+									  "src/graphics_engine/shader/graphic.f",
+									  "graphic");
+		
+		set_shader("graphic", "view", view_);
+		set_shader("graphic", "projection", projection_);
 
 		// 线框模式
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+		// 构造世界
 		the_world_ = new world({ 0.0f, -9.8f });
+
+		// 绑定刚体模板的顶点属性
+		bind_vertex_array();
 
 		return 0;
 	}

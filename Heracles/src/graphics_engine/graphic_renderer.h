@@ -39,7 +39,8 @@ namespace heracles {
 	public:
 
 		// 切换/设置着色器
-		static void set_shader(const char* s, const char* v_name, const vec2 v, const char* m_name, const mat22 m);
+		static void set_shader(const char* shader_name, const char* name, const vec2 v);
+		static void set_shader(const char* shader_name, const char* name, const mat22 m);
 
 		// 绘制文字
 		static void draw_text(const bool is_screen, const std::string text, 
@@ -47,7 +48,7 @@ namespace heracles {
 							  const GLfloat r, const GLfloat g, const GLfloat b);
 
 		// 绘制刚体
-		static void draw_body(polygon_body& body);
+		static void draw_body(rigid_body& body);
 
 		// 绘制铰链
 		static void draw_joint();
@@ -59,7 +60,7 @@ namespace heracles {
 		static auto diff_time();
 
 		// 绑定刚体对象的顶点，新创建的刚体只需要调用一次该函数
-		static void bind_vertex_array(polygon_body& body);
+		static void bind_vertex_array();
 
 		// 渲染
 		static void display();

@@ -1,6 +1,47 @@
 #include "body.h"
+#include <iostream>
 
 namespace heracles {
+
+	const body::vertex_list body::point = {
+		vec2( 0.0f,   2.0f),
+		vec2(-1.73f, -1.0f),
+		vec2( 1.73f, -1.0f)
+	};
+
+	const body::vertex_list body::line = {
+		vec2(-1.0f, -1.0f),
+		vec2( 1.0f, -1.0f),
+		vec2( 1.0f,  1.0f),
+		vec2(-1.0f,  1.0f)
+	};
+
+	const body::vertex_list body::triangle = {
+		vec2( 0.0f,   2.0f),
+		vec2(-1.73f, -1.0f),
+		vec2( 1.73f, -1.0f)
+	};
+
+	const body::vertex_list body::rectangle = {
+		vec2(-2.0f, -2.0f),
+		vec2( 2.0f, -2.0f),
+		vec2( 2.0f,  2.0f),
+		vec2(-2.0f,  2.0f)
+	};
+
+	std::map<const std::string, unsigned int> body::type_map{
+		std::pair<const std::string, unsigned int>("point", 0),
+		std::pair<const std::string, unsigned int>("line", 0),
+		std::pair<const std::string, unsigned int>("triangle", 0),
+		std::pair<const std::string, unsigned int>("rectangle" ,0)
+	};
+
+	std::map<const std::string, body::vertex_list> body::template_map{
+		std::pair<const std::string, vertex_list>("point", point),
+		std::pair<const std::string, vertex_list>("line", line),
+		std::pair<const std::string, vertex_list>("triangle", triangle),
+		std::pair<const std::string, vertex_list>("rectangle", rectangle)
+	};
 
 	body::body(const uint16_t id, const float mass) :id_(id) { set_mass(mass); }
 
@@ -84,22 +125,25 @@ namespace heracles {
 		return mass / 6 * sum / sum_area;
 	}
 
-	polygon_body::polygon_body(const uint16_t id, const float mass, const vertex_list vertices) :body(id, mass), vertices_(vertices) {
-		set_centroid(calculate_centroid(vertices_));
-		set_inertia(calculate_inertia(mass, vertices_));
+	rigid_body::rigid_body(const unsigned int id, const float mass, const vertex_list* vertices, const mat22* scale)
+					:body(id, mass), vertices_(vertices), scale_(scale) {
+		set_centroid(calculate_centroid(*vertices_));
+		set_inertia(calculate_inertia(mass, *vertices_));
 	}
 
-	size_t polygon_body::count() const { return vertices_.size(); }
+	size_t rigid_body::count() const { return vertices_->size(); }
 
-	vec2 polygon_body::operator[](size_t idx) const { return rotation_ * (vertices_[idx] - centroid_) + centroid_; }
+	vec2 rigid_body::operator[](size_t idx) const { return rotation_ * ((*vertices_)[idx] - centroid_) + centroid_; }
 
-	vec2 polygon_body::edge(size_t idx) const { return (*this)[(idx + 1) % vertices_.size()] - (*this)[idx]; }
+	vec2 rigid_body::edge(size_t idx) const { return (*this)[(idx + 1) % vertices_->size()] - (*this)[idx]; }
 
-	body::vertex_list polygon_body::get_vertices() const { return vertices_; }
+	body::vertex_list rigid_body::get_vertices() const { return *vertices_; }
 
-	float polygon_body::min_separating_axis(size_t &idx, const polygon_body &other) const {
+	mat22 rigid_body::get_scale() const { return *scale_; }
+
+	float rigid_body::min_separating_axis(size_t &idx, const rigid_body &other) const {
 		auto separation = -inf;
-		for (size_t i = 0; i < vertices_.size(); ++i) {
+		for (size_t i = 0; i < vertices_->size(); ++i) {
 			const auto va = world_position_ + rotation_ * (*this)[i]  ;
 			const auto n = edge(i).normal();
 			auto min_sep = inf;
