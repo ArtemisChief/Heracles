@@ -16,7 +16,7 @@ Simple 2D Physics Engine
 
 [MrZse](https://github.com/MrZse)
 
-[Sprinte-Wei](https://github.com/Sprinte-Wei)
+[we98](https://github.com/we98)
 
 [yyzih](https://github.com/yyzih)
 
