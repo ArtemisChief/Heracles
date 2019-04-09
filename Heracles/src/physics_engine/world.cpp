@@ -36,7 +36,8 @@ namespace heracles {
 		return create_rigid_body("line", inf, scale, world_position);
 	}
 
-	rigid_body::ptr world::create_triangle(const float mass, const float base, const float height, 
+	rigid_body
+		::ptr world::create_triangle(const float mass, const float base, const float height, 
 										   const vec2& world_position) const {
 		const auto scale = new mat22{ base / 3.46f, 0.0f, 0.0f,  height / 3.0f };
 		return create_rigid_body("triangle", mass, scale, world_position);

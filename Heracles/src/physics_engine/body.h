@@ -72,20 +72,28 @@ namespace heracles {
 	protected:
 		
 		DISALLOW_COPY_AND_ASSIGN(rigid_body);
-		const vertex_list* vertices_;
+		vertex_list* vertices_;
+		vertex_list* post_vertices_;//上一帧顶点位置
+		vec2 post_position_;//上一帧质点位置
 		const mat22* scale_;
 
 	public:
 		using ptr = std::shared_ptr < rigid_body >;
 
-		rigid_body(const unsigned int id, const float mass, const vertex_list* vertices, const mat22* scale);
+		rigid_body(const unsigned int id, const float mass, vertex_list* vertices, const mat22* scale);
 
 		size_t count() const;
 		vec2 operator[](size_t idx) const;
 		vec2 edge(size_t idx) const;
 
+		void setPost_position(const vec2& vec);
+		vec2 getPost_position();
+
 		vertex_list get_vertices() const;
+		vertex_list getPostvertices() const;
 		mat22 get_scale() const;
+
+		void updateVertices(vertex_list* vertex1, const vertex_list* vertex2);
 
 		/* 分离轴定理（SAT）
 		 * 检测两凸多边形是否相交

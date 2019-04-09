@@ -2,6 +2,7 @@
 #include "../util/math.h"
 #include <vector>
 #include "body.h"
+#include "collision.h"
 #include <mutex>
 
 namespace heracles {
@@ -40,6 +41,7 @@ namespace heracles {
 	private:
 		vec2 g_;	//重力加速度
 		body_list bodies_;
+		arbiter* ar = new arbiter(this);
 	};
 
 }

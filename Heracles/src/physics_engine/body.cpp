@@ -125,21 +125,54 @@ namespace heracles {
 		return mass / 6 * sum / sum_area;
 	}
 
-	rigid_body::rigid_body(const unsigned int id, const float mass, const vertex_list* vertices, const mat22* scale)
+	rigid_body::rigid_body(const unsigned int id, const float mass, vertex_list* vertices, const mat22* scale)
 					:body(id, mass), vertices_(vertices), scale_(scale) {
 		set_centroid(calculate_centroid(*vertices_));
 		set_inertia(calculate_inertia(mass, *vertices_));
+		setPost_position(centroid_);
+		updateVertices(post_vertices_, vertices_);
 	}
 
 	size_t rigid_body::count() const { return vertices_->size(); }
 
 	vec2 rigid_body::operator[](size_t idx) const { return rotation_ * ((*vertices_)[idx] - centroid_) + centroid_; }
 
+	void rigid_body::setPost_position(const vec2& vec)
+	{
+		post_position_.x = vec.x;
+		post_position_.y = vec.y;
+	}
+
+	vec2 rigid_body::getPost_position() { return post_position_; }
+
 	vec2 rigid_body::edge(size_t idx) const { return (*this)[(idx + 1) % vertices_->size()] - (*this)[idx]; }
 
 	body::vertex_list rigid_body::get_vertices() const { return *vertices_; }
 
+	body::vertex_list rigid_body::getPostvertices() const { return *post_vertices_; }
+
 	mat22 rigid_body::get_scale() const { return *scale_; }
+
+	void rigid_body::updateVertices(vertex_list* vertex1, const vertex_list* vertex2)
+	{
+		size_t size = vertex2->size();
+		if (vertex1->size() == 0)
+		{
+			for (size_t i = 0; i < size; ++i)
+			{
+				vec2* vec = new vec2(vertex2->at(i).x, vertex2->at(i).y);
+				vertex1->push_back(*vec);
+			}
+		}
+		else
+		{
+			for (size_t i = 0; i < size; ++i)
+			{
+				vertex1->at(i).x = vertex2->at(i).x;
+				vertex1->at(i).y = vertex2->at(i).y;
+			}
+		}
+	}
 
 	float rigid_body::min_separating_axis(size_t &idx, const rigid_body &other) const {
 		auto separation = -inf;
