@@ -38,10 +38,13 @@ namespace heracles {
 			const float mass, const float width, const float height,
 			const vec2& world_position) const;
 
+		void testCollision();
+
 	private:
 		vec2 g_;	//重力加速度
 		body_list bodies_;
-		arbiter* ar = new arbiter(this);
+		rigid_body::ptr thisbody1;
+		rigid_body::ptr thisbody2;
 	};
 
 }

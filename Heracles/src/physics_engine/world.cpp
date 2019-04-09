@@ -49,4 +49,21 @@ namespace heracles {
 		return create_rigid_body("rectangle", mass, scale, world_position);
 	}
 
+	void world::testCollision()//暂时假设全为凸多边形
+	{
+		/*size_t size = bodies_.size();
+		for (size_t i = 0; i < size; ++i)
+		{
+			thisbody1 = bodies_.at(i);
+			size_t idx;
+			for (size_t j = i + 1; j < size; ++j)
+			{
+				thisbody2 = bodies_.at(j);
+				if (thisbody1->min_separating_axis(idx, *thisbody2) <= 0)//确认碰撞
+				{
+					arbiter(thisbody1, thisbody2).solCollision();
+				}
+			}
+		}*/
+	}
 }

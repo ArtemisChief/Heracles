@@ -4,12 +4,13 @@
 
 namespace heracles {
 
-	arbiter::arbiter(world* thisworld)
+	arbiter::arbiter(rigid_body::ptr thisbody1, rigid_body::ptr thisbody2)
 	{
-		this->thisworld = thisworld;
+		this->thisbody1 = thisbody1;
+		this->thisbody2 = thisbody2;
 	}
 
-	void arbiter::testCollision()//暂时假设全为凸多边形
+	/*void arbiter::testCollision()//暂时假设全为凸多边形
 	{
 		size_t size = thisbodies.size();
 		for (size_t i = 0; i < size; ++i)
@@ -24,7 +25,7 @@ namespace heracles {
 				}
 			}
 		}
-	}
+	}*/
 
 	void arbiter::solCollision()//暂时认为1的点进入2里面
 	{
@@ -102,7 +103,7 @@ namespace heracles {
 		return d1 / d2;
 	}
 
-	vec2 l2l(const vec2& v1, const vec2& v2, const vec2& v3, const vec2& v4)//计算直线交点
+	vec2 arbiter::l2l(const vec2& v1, const vec2& v2, const vec2& v3, const vec2& v4)//计算直线交点
 	{
 		double a1, a2, b1, b2, c1, c2;
 		a1 = v1.x - v2.x;
