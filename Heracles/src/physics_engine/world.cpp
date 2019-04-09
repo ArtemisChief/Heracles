@@ -9,10 +9,26 @@ namespace heracles {
 
 	void world::step(const float dt) {
 		for (auto& body : bodies_)
+		{
 			body->update_force(g_, dt);
+			if (typeid(body) == typeid(rigid_body::ptr))
+			{
+				rigid_body::ptr rigid = std::dynamic_pointer_cast<rigid_body>(body);
+				rigid->updateVertices(&rigid->getPostvertices(), &rigid->get_vertices());
+				size_t size = rigid->count();
+				body::vertex_list list = rigid->get_vertices();
+				for (size_t i = 0; i < size; i++)
+				{
+					list.at(i).x = (*rigid)[i].x;
+					list.at(i).y = (*rigid)[i].y;
+				}
+				body->set_rotation(0);
+			}
+		}
+		testCollision();
 	}
 
-	void world::add(const body::ptr body) { bodies_.push_back(body); }
+	void world::add(body::ptr body) { bodies_.push_back(body); }
 
 	const world::body_list& world::get_bodies() const { return bodies_; }
 
@@ -51,19 +67,24 @@ namespace heracles {
 
 	void world::testCollision()//暂时假设全为凸多边形
 	{
-		/*size_t size = bodies_.size();
+		size_t size = bodies_.size();
 		for (size_t i = 0; i < size; ++i)
 		{
-			thisbody1 = bodies_.at(i);
-			size_t idx;
-			for (size_t j = i + 1; j < size; ++j)
+			//if (typeid(bodies_.at(i)) == typeid(rigid_body::ptr))
 			{
-				thisbody2 = bodies_.at(j);
-				if (thisbody1->min_separating_axis(idx, *thisbody2) <= 0)//确认碰撞
+				//std::cout << "yes" << std::endl;
+				thisbody1 = std::dynamic_pointer_cast<rigid_body>(bodies_.at(i));
+				size_t idx;
+				for (size_t j = i + 1; j < size; ++j)
 				{
-					arbiter(thisbody1, thisbody2).solCollision();
+					thisbody2 = std::dynamic_pointer_cast<rigid_body>(bodies_.at(j));
+					if (thisbody1->min_separating_axis(idx, *thisbody2) <= 0)//确认碰撞
+					{
+						std::cout << "yes" << std::endl;
+						arbiter(thisbody1, thisbody2).solCollision();
+					}
 				}
 			}
-		}*/
+		}
 	}
 }

@@ -57,6 +57,7 @@ namespace heracles {
 			return;
 		velocity_ += (g + force_ * inv_mass_) * dt;
 		angular_velocity_ += torque_ * inv_inertia_ * dt;
+		post_position_ = world_position_;
 		world_position_ += velocity_ * dt;
 		rotation_ = mat22(angular_velocity_ * dt) * rotation_;
 	}
@@ -125,8 +126,16 @@ namespace heracles {
 		return mass / 6 * sum / sum_area;
 	}
 
+	void body::setPost_position(const vec2& vec)
+	{
+		post_position_.x = vec.x;
+		post_position_.y = vec.y;
+	}
+
+	vec2 body::getPost_position() { return post_position_; }
+
 	rigid_body::rigid_body(const unsigned int id, const float mass, vertex_list* vertices, const mat22* scale)
-					:body(id, mass), vertices_(vertices), scale_(scale) {
+					:body(id, mass), vertices_(vertices), post_vertices_(vertices), scale_(scale) {
 		set_centroid(calculate_centroid(*vertices_));
 		set_inertia(calculate_inertia(mass, *vertices_));
 		setPost_position(centroid_);
@@ -137,14 +146,6 @@ namespace heracles {
 
 	vec2 rigid_body::operator[](size_t idx) const { return rotation_ * ((*vertices_)[idx] - centroid_) + centroid_; }
 
-	void rigid_body::setPost_position(const vec2& vec)
-	{
-		post_position_.x = vec.x;
-		post_position_.y = vec.y;
-	}
-
-	vec2 rigid_body::getPost_position() { return post_position_; }
-
 	vec2 rigid_body::edge(size_t idx) const { return (*this)[(idx + 1) % vertices_->size()] - (*this)[idx]; }
 
 	body::vertex_list rigid_body::get_vertices() const { return *vertices_; }
@@ -153,10 +154,10 @@ namespace heracles {
 
 	mat22 rigid_body::get_scale() const { return *scale_; }
 
-	void rigid_body::updateVertices(vertex_list* vertex1, const vertex_list* vertex2)
+	void rigid_body::updateVertices(vertex_list* vertex1, const vertex_list* vertex2)//这个函数有问题
 	{
 		size_t size = vertex2->size();
-		if (vertex1->size() == 0)
+		/*if (vertex1->size() == 0)
 		{
 			for (size_t i = 0; i < size; ++i)
 			{
@@ -164,7 +165,7 @@ namespace heracles {
 				vertex1->push_back(*vec);
 			}
 		}
-		else
+		else*/
 		{
 			for (size_t i = 0; i < size; ++i)
 			{

@@ -16,6 +16,7 @@ namespace heracles {
 		float inv_inertia_;						// 转动惯量倒数
 		vec2  centroid_			{ 0, 0 };		// 质心
 		vec2  world_position_	{ 0, 0 };		// 世界坐标位置
+		vec2 post_position_;//上一帧质点位置
 		mat22 rotation_			{ 1, 0, 0, 1 };	// 旋转
 		vec2  velocity_			{ 0, 0 };		// 速度
 		float angular_velocity_	{ 0 };			// 角速度
@@ -66,6 +67,10 @@ namespace heracles {
 		void set_force(const vec2& force);
 		void set_torque(const float torque);
 		void set_friction(const float friction);
+
+
+		void setPost_position(const vec2& vec);
+		vec2 getPost_position();
 	};
 
 	class rigid_body : public body {
@@ -74,7 +79,6 @@ namespace heracles {
 		DISALLOW_COPY_AND_ASSIGN(rigid_body);
 		vertex_list* vertices_;
 		vertex_list* post_vertices_;//上一帧顶点位置
-		vec2 post_position_;//上一帧质点位置
 		const mat22* scale_;
 
 	public:
@@ -86,14 +90,11 @@ namespace heracles {
 		vec2 operator[](size_t idx) const;
 		vec2 edge(size_t idx) const;
 
-		void setPost_position(const vec2& vec);
-		vec2 getPost_position();
-
 		vertex_list get_vertices() const;
 		vertex_list getPostvertices() const;
 		mat22 get_scale() const;
 
-		void updateVertices(vertex_list* vertex1, const vertex_list* vertex2);
+		void updateVertices(vertex_list* vertex1, const vertex_list* vertex2);//这个函数有问题
 
 		/* 分离轴定理（SAT）
 		 * 检测两凸多边形是否相交

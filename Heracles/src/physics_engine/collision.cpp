@@ -1,6 +1,7 @@
 #include "collision.h"
 #include <vector>
 #include <iostream>
+#include <cmath>
 
 namespace heracles {
 
@@ -27,6 +28,48 @@ namespace heracles {
 		}
 	}*/
 
+	bool arbiter::onsegment(vec2 pi, vec2 pj, vec2 Q)
+	{
+		if ((Q.x - pi.x)*(pj.y - pi.y) == (pj.x - pi.x)*(Q.y - pi.y) && (pi.x > pj.x ? pj.x: pi.x) <= Q.x&&Q.x <= (pi.x> pj.x? pi.x:pj.x) && (pi.y<pj.y? pi.y:pj.y) <= Q.y&&Q.y <= (pi.y> pj.y? pi.y:pj.y)) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	bool arbiter::insidepolygon(vec2 p)
+	{
+		int counter = 0;
+		double xinters;
+		size_t size = thisbody2->count();
+		vec2 p1, p2;
+		p1 = thisbody2->get_vertices().at(0);
+		for (int i = 1; i <= size; i++) {
+			p2 = thisbody2->get_vertices().at(i%size);
+			if (onsegment(p1, p2, p)) {
+				return true;
+			}
+			if (p.y>(p1.y< p2.y?p1.y:p2.y)) {
+				if (p.y <= (p1.y> p2.y?p1.y:p2.y)) {
+					if (p.x <= (p1.x> p2.x?p1.x:p2.x)) {
+						if (p1.y != p2.y) {
+							xinters = (p.y - p1.y)*(p2.x - p1.x) / (p2.y - p1.y) + p1.x;
+							if (p1.x == p2.x || p.x <= xinters) {
+								counter++;
+							}
+						}
+					}
+				}
+			}
+			p1 = p2;
+		}
+		if (counter % 2 == 0) {
+			return false;
+		}
+		return true;
+	}
+
 	void arbiter::solCollision()//暂时认为1的点进入2里面
 	{
 		size_t size = thisbody1->count();
@@ -40,18 +83,10 @@ namespace heracles {
 		vec2 vp1 = thisbody1->get_world_position();
 		vec2 vp2 = thisbody2->get_world_position();
 
-		for (size_t i = 0; i < size; ++i)//判断有哪些点在里面
+		for (size_t i = 0; i < size; ++i)//判断有哪些点在里面 这里有问题
 		{
 			vk = thisbody1->get_vertices().at(i) + vp1;
-			for (j = 0, k = size2 - 1; j < size2; k = j++)
-			{
-				v1 = thisbody2->get_vertices().at(j) + vp2;
-				v2 = thisbody2->get_vertices().at(k) + vp2;
-				if (((v1.y>vk.y) != (v2.y>vk.y)) &&
-					(vk.x < (v2.x - v1.x) * (vk.y - v1.y) / (v2.y - v1.y) + v1.x))
-					l = !l;
-			}
-			if (l) insideV.push_back(i);
+			if (insidepolygon(vk)) insideV.push_back(i);
 		}
 
 		size = insideV.size();//此时v1v2vk分别为当前过去坐标和碰撞点
@@ -69,19 +104,30 @@ namespace heracles {
 			v2.x += vertex2.at(i).x + post_vp1.x;
 			v1.y += vertex1.at(i).y + vp1.y;
 			v2.y += vertex2.at(i).y + post_vp1.y;
+
+			/*std::cout << i << std::endl;
+			std::cout << size << std::endl;*/
+			
 		}
 		v1.x /= size;
 		v1.y /= size;
 		v2.x /= size;
 		v2.y /= size;
 
+		/*std::cout << v1.x << std::endl;
+		std::cout << v2.x << std::endl;
+		std::cout << v1.y << std::endl;
+		std::cout << v2.y << std::endl;*/
+
 		size = thisbody2->count();
 		vertex1 = thisbody2->get_vertices();
 		double dis = inf;
-		size_t id;//碰撞的第几条边
+		size_t id = 0;//碰撞的第几条边
 		for (size_t i = 0; i < size; ++i)
 		{
 			double d = dis_p2l(v1, vertex1.at(i) + vp2, vertex1.at((i+1)%size) + vp2);
+			std::cout << vertex1.at(i).x << " " << vertex1.at(i).y << std::endl;
+			std::cout << d << std::endl;
 			if (d < dis)
 			{
 				dis = d;
@@ -92,26 +138,57 @@ namespace heracles {
 		vk = l2l(v1, v2, vertex1.at(id) + vp2, vertex1.at((id + 1) % size) + vp2);//碰撞点;
 		v1 = vertex1.at(id) + vp2;
 		v2 = vertex1.at((id + 1) % size) + vp2;
-		vec2 power = vec2(v2.y - v1.y, v1.x - v2.x);
+		vec2 power = vec2(v2.y - v1.y, v1.x - v2.x);//应该修改，0的情况
+
+		std::cout << vk.x << std::endl;
+		std::cout << vk.y << std::endl;
+		std::cout << power.x << std::endl;
+		std::cout << power.y << std::endl;
+
 		key->changeState(*thisbody1, *thisbody2, power, vk);
 	}
 
 	double arbiter::dis_p2l(const vec2& vk, const vec2& v1, const vec2& v2)//计算点到直线距离
 	{
+		std::cout << v1.x << std::endl;
+		std::cout << v2.x << std::endl;
+		std::cout << v1.y << std::endl;
+		std::cout << v2.y << std::endl;
+
+		if (v1.x == v2.x)
+		{
+			return fabs(v1.x - vk.x);
+		}
+		else if (v1.y == v2.y)
+		{
+			return fabs(v1.y - vk.y);
+		}
 		double d1 = fabs(vk.x / (v1.x - v2.x) + vk.y / (v2.y - v1.y) + v2.x / (v2.x - v1.x) + v2.y / (v1.y - v2.y));
 		double d2 = sqrt((1 / (v1.x - v2.x)) * (1 / (v1.x - v2.x)) + (1 / (v1.y - v2.y)) * (1 / (v1.y - v2.y)));
 		return d1 / d2;
 	}
 
-	vec2 arbiter::l2l(const vec2& v1, const vec2& v2, const vec2& v3, const vec2& v4)//计算直线交点
+	vec2 arbiter::l2l(const vec2& v1, const vec2& v2, const vec2& v3, const vec2& v4)//计算直线交点 算错了
 	{
 		double a1, a2, b1, b2, c1, c2;
-		a1 = v1.x - v2.x;
-		b1 = v2.y - v1.y;
-		c1 = v2.x / (v2.x - v1.x) + v2.y / (v1.y - v2.y);
-		a2 = v3.x - v4.x;
-		b2 = v4.y - v3.y;
-		c2 = v4.x / (v4.x - v3.x) + v4.y / (v3.y - v4.y);
+
+		a1 = v1.y - v2.y;
+		b1 = v2.x - v1.x;
+		c1 = v2.x * (v2.y - v1.y) + v2.y * (v1.x - v2.x);
+		a2 = v3.y - v4.y;
+		b2 = v4.x - v3.x;
+		c2 = v4.x * (v4.y - v3.y) + v4.y * (v3.x - v4.x);
+
+		/*std::cout << a1 << std::endl;
+		std::cout << b1 << std::endl;
+		std::cout << c1 << std::endl;
+		std::cout << a2 << std::endl;
+		std::cout << b2 << std::endl;
+		std::cout << c2 << std::endl;
+		std::cout << v1.x << std::endl;
+		std::cout << v1.y << std::endl;
+		std::cout << v2.x << std::endl;
+		std::cout << v2.y << std::endl;*/
 
 		double x = (c1*b2 - c2 * b1) / (a2*b1 - a1 * b2);
 		double y = (a2*c1 - a1 * c2) / (a1*b2 - a2 * b1);
@@ -130,8 +207,9 @@ namespace heracles {
 		double la = calDistance(body1, power, point);
 		double lb = calDistance(body2, power, point);
 
-		double* va = calSpeed(body1, power);
-		double* vb = calSpeed(body2, power);
+		vec2 va, vb;
+		calSpeed(va, body1, power);
+		calSpeed(vb, body2, power);
 
 		double I = 2 * (va[1] + vb[1] + la * body1.get_angular_velocity() + lb * body2.get_angular_velocity())
 			/ (body1.get_inv_mass() + body1.get_inv_inertia() + body2.get_inv_mass() + body2.get_inv_inertia());//冲量
@@ -148,6 +226,15 @@ namespace heracles {
 		double wa2 = I * la * body1.get_inv_inertia() + body1.get_angular_velocity();
 		double wb2 = I * lb * body2.get_inv_inertia() + body2.get_angular_velocity();
 
+		/*std::cout << la << std::endl;
+		std::cout << va2 << std::endl;
+		std::cout << vax << std::endl;
+		std::cout << vay << std::endl;
+		std::cout << vbx << std::endl;
+		std::cout << vby << std::endl;
+		std::cout << wa2 << std::endl;
+		std::cout << wb2 << std::endl;*/
+
 		body1.set_velocity(vec2(vax,vay));
 		body1.set_angular_velocity(wa2);
 		body2.set_velocity(vec2(vbx, vby));
@@ -156,12 +243,12 @@ namespace heracles {
 
 	double arbiter_key::calDistance(body& body1, vec2& power, vec2& point)
 	{
-		double f1 = fabs((double)power.y * body1.get_world_position().x / power.x + point.y - (double)power.y * point.x / power.x);
-		double f2 = sqrt(pow(power.y / power.x, 2) + 1);
+		double f1 = fabs((double)power.y * body1.get_world_position().x + point.y * power.x - (double)power.y * point.x);
+		double f2 = sqrt(pow(power.y, 2) + pow(power.x, 2));
 		return f1 / f2;
 	}
 
-	double* arbiter_key::calSpeed(body& body1, vec2& power)
+	void arbiter_key::calSpeed(vec2 speed, body& body1, vec2& power)
 	{
 		float f1 = (float)body1.get_velocity().y / body1.get_velocity().x - (float)power.y / power.x;
 		float f2 = 1 + (float)body1.get_velocity().y * power.y / (body1.get_velocity().x * power.x);
@@ -169,7 +256,7 @@ namespace heracles {
 		
 		double vy = sqrt(body1.get_velocity().y * body1.get_velocity().y + body1.get_velocity().x * body1.get_velocity().x) * cos(angel);
 		double vx = sqrt(body1.get_velocity().y * body1.get_velocity().y + body1.get_velocity().x * body1.get_velocity().x) * sin(angel);
-		double v[2] = { vx, vy };
-		return v;
+		speed.x = vx;
+		speed.y = vy;
 	}
 }
