@@ -1,58 +1,228 @@
 #include "collision.h"
 #include <iostream>
+#include <algorithm>
+#include "world.h"
 
 namespace heracles {
-	void arbiter::changeState(body& body1, body& body2, vec2& power, vec2& point)
-	{
-		if (power.y < 0)
-		{
-			power.x = -power.x;
-			power.y = -power.y;
-		}//保证正方向向上
 
-		double la = calDistance(body1, power, point);
-		double lb = calDistance(body2, power, point);
-
-		double* va = calSpeed(body1, power);
-		double* vb = calSpeed(body2, power);
-
-		double I = 2 * (va[1] + vb[1] + la * body1.get_angular_velocity() + lb * body2.get_angular_velocity())
-			/ (body1.get_inv_mass() + body1.get_inv_inertia() + body2.get_inv_mass() + body2.get_inv_inertia());//冲量
-
-		double va2 = I * body1.get_inv_mass() + va[1];
-		double vb2 = -I * body2.get_inv_mass() + vb[1];
-
-		double angle = atan((double)power.y / power.x);
-		double vax = va2 * cos(angle) + va[0] * sin(angle);
-		double vay = va2 * sin(angle) + va[0] * cos(angle);
-		double vbx = vb2 * cos(angle) + vb[0] * sin(angle);
-		double vby = vb2 * sin(angle) + vb[0] * cos(angle);
-
-		double wa2 = I * la * body1.get_inv_inertia() + body1.get_angular_velocity();
-		double wb2 = I * lb * body2.get_inv_inertia() + body2.get_angular_velocity();
-
-		body1.set_velocity(vec2(vax,vay));
-		body1.set_angular_velocity(wa2);
-		body2.set_velocity(vec2(vbx, vby));
-		body2.set_angular_velocity(wb2);
+	contact::contact(const rigid_body &b, size_t idx) {
+		indices = { {idx, idx} };
+		std::fill(from_a.begin(), from_a.end(), false);
+		position = b.get_world_position() + b[idx];
 	}
 
-	double arbiter::calDistance(body& body1, vec2& power, vec2& point)
-	{
-		double f1 = (double)power.y * body1.get_world_position().x / power.x + point.y - (double)power.y * point.x / power.x;
-		double f2 = sqrt(pow(power.y / power.x, 2) + 1);
-		return f1 / f2;
+	bool contact::operator==(const contact &other) const {
+		if (from_a == other.from_a && indices == other.indices) {
+			return true;
+		}
+		decltype(from_a) from_a_swap = { {from_a[1], from_a[0]} };
+		decltype(indices) indices_swap = { {indices[1], indices[0]} };
+		return from_a_swap == other.from_a && indices_swap == other.indices;
 	}
 
-	double* arbiter::calSpeed(body& body1, vec2& power)
-	{
-		float f1 = (float)body1.get_velocity().y / body1.get_velocity().x - (float)power.y / power.x;
-		float f2 = 1 + (float)body1.get_velocity().y * power.y / (body1.get_velocity().x * power.x);
-		float angel = atan(f1 / f2);
-		
-		double vy = sqrt(body1.get_velocity().y * body1.get_velocity().y + body1.get_velocity().x * body1.get_velocity().x) * cos(angel);
-		double vx = sqrt(body1.get_velocity().y * body1.get_velocity().y + body1.get_velocity().x * body1.get_velocity().x) * sin(angel);
-		double v[2] = { vx, vy };
-		return v;
+	bool contact::operator!=(const contact &other) const {
+		return !(*this == other);
 	}
+
+	// ---------------------------------------------------
+	// pair
+
+	arbiter::arbiter(body::ptr a, body::ptr b, const vec2 &normal, const arbiter::contact_list &contacts)
+		: _a(a), _b(b), _normal(normal), _contacts(contacts) {
+	}
+
+	const arbiter::contact_list &arbiter::get_contacts() const {
+		return _contacts;
+	}
+
+	const vec2 &arbiter::get_normal() const {
+		return _normal;
+	}
+
+	void arbiter::pre_step(float dt) {
+		static const float kAllowedPenetration = 0.01;
+		static const float kBiasFactor = 0.2; // 弹性碰撞系数，1.0为完全弹性碰撞
+		auto tangent = _normal.normal();
+		auto a = _a.lock();
+		auto b = _b.lock();
+		for (auto &contact : _contacts) {
+			auto kn = a->get_inv_mass() + b->get_inv_mass() +
+				dot(a->get_inv_inertia() * cross(cross(contact.ra, _normal), contact.ra) +
+					b->get_inv_inertia() * cross(cross(contact.rb, _normal), contact.rb), _normal);
+			auto kt = a->get_inv_mass() + b->get_inv_mass() +
+				dot(a->get_inv_inertia() * cross(cross(contact.ra, tangent), contact.ra) +
+					b->get_inv_inertia() * cross(cross(contact.rb, tangent), contact.rb), tangent);
+
+			contact.mass_normal = 1 / kn;
+			contact.mass_tangent = 1 / kt;
+			contact.bias = -kBiasFactor / dt * std::min(0.0f, contact.separation + kAllowedPenetration);
+		}
+	}
+
+	void arbiter::update_impulse() {
+		auto tangent = _normal.normal();
+		auto a = _a.lock();
+		auto b = _b.lock();
+		for (auto &contact : _contacts) {
+			vec2 dv = (b->get_velocity() + cross(b->get_angular_velocity(), contact.rb)) -
+				(a->get_velocity() + cross(a->get_angular_velocity(), contact.ra));
+
+			auto vn = dot(dv, _normal);
+			auto dpn = (-vn + contact.bias) * contact.mass_normal;
+			dpn = std::max(contact.pn + dpn, 0.0f) - contact.pn;
+
+			float friction = std::sqrt(a->get_friction() * b->get_friction());
+			auto vt = dot(dv, tangent);
+			auto dpt = -vt * contact.mass_tangent;
+			dpt = std::max(-friction * contact.pn, std::min(friction * contact.pn, contact.pt + dpt)) - contact.pt;
+
+			auto p = dpn * _normal + dpt * tangent;
+			a->update_impulse(-p, contact.ra);
+			b->update_impulse(p, contact.rb);
+			contact.pn += dpn;
+			contact.pt += dpt;
+		}
+	}
+
+	void arbiter::update(const arbiter &old_arbiter) {
+		const auto &old_contacts = old_arbiter._contacts;
+		auto tangent = _normal.normal();
+		auto a = _a.lock();
+		auto b = _b.lock();
+		for (auto &new_contact : _contacts) {
+			auto old_contact = std::find(old_contacts.begin(), old_contacts.end(), new_contact);
+			if (old_contact != old_contacts.end()) {
+				new_contact.pn = old_contact->pn;
+				new_contact.pt = old_contact->pt;
+
+				auto p = new_contact.pn * _normal + new_contact.pt * tangent;
+				a->update_impulse(-p, new_contact.ra);
+				b->update_impulse(p, new_contact.rb);
+			}
+		}
+	}
+
+	void arbiter::add_contact(const contact &contact) {
+		_contacts.push_back(contact);
+	}
+
+	// ---------------------------------------------------
+	// collision detection
+
+		// 找出最小间隙
+	static size_t incident_edge(const vec2 &N, const rigid_body &body) {
+		size_t idx = SIZE_MAX;
+		auto min_dot = inf;
+		// 遍历B物体的边
+		for (size_t i = 0; i < body.count(); ++i) {
+			// 获得边上的法向量
+			auto edge_normal = body.edge(i).normal();
+			// 获得法向量在SAT轴上的投影长度
+			auto _dot = dot(edge_normal, N);
+			// 找出最小投影，即最小间隙
+			if (_dot < min_dot) {
+				min_dot = _dot; // 最小间隙
+				idx = i; // 返回索引
+			}
+		}
+		return idx;
+	}
+
+	static size_t clip(arbiter::contact_list &contacts_out,
+					   const arbiter::contact_list &contacts_in,
+					   size_t idx, const vec2 &v0, const vec2 &v1) {
+		size_t num_out = 0;
+		// 得到A物体的边v0_v1的单位向量
+		auto N = (v1 - v0).normalized();
+		// dist0 = v0_B0 X N
+		auto dist0 = cross(contacts_in[0].position - v0, N);
+		// dist1 = v0_B1 X N
+		auto dist1 = cross(contacts_in[1].position - v0, N);
+		if (dist0 <= 0) {
+			// v0_B0 与 N 共线或顺时针
+			contacts_out[num_out++] = contacts_in[0];
+		}
+		if (dist1 <= 0) {
+			// v0_B1 与 N 共线或顺时针
+			contacts_out[num_out++] = contacts_in[1];
+		}
+		if (dist0 * dist1 < 0) { // 一正一负
+			auto total_dist = dist0 - dist1;
+			auto v = (contacts_in[0].position * -dist1 + contacts_in[1].position * dist0) / total_dist;
+			assert(!std::isnan(v.x) && !std::isnan(v.y));
+			contacts_out[num_out].position = v;
+			contacts_out[num_out].from_a[0] = true;
+			contacts_out[num_out].indices[0] = idx;
+
+			++num_out;
+		}
+		assert(num_out <= 2);
+		return num_out;
+	}
+
+	arbiter::ptr arbiter::is_collide(rigid_body::ptr &pa, rigid_body::ptr &pb, uint32_t &id) {
+		auto _pa = &pa;
+		auto _pb = &pb;
+		size_t ia, ib;
+		float sa, sb;
+		if ((sa = pa->min_separating_axis(ia, *pb)) >= 0) {
+			id = MAKE_ID(*pa->get_id(), *pb->get_id());
+			return nullptr;
+		}
+		if ((sb = pb->min_separating_axis(ib, *pa)) >= 0) {
+			id = MAKE_ID(*pa->get_id(), *pb->get_id());
+			return nullptr;
+		}
+		// 当且仅当SAT全为负，则表示相交
+		if (sa < sb) { // 有序排列
+			std::swap(sa, sb);
+			std::swap(ia, ib);
+			std::swap(_pa, _pb);
+		}
+		auto &a = **_pa;
+		auto &b = **_pb;
+		// 获得SAT的轴
+		auto N = a.edge(ia).normal();
+		// 获得最小间隙时的B物体起点索引
+		auto idx = incident_edge(N, b);
+		// 获得最小间隙时的B物体终点索引
+		auto next_idx = (idx + 1) % b.count();
+		// 关节列表，暂时认为边 idx-next_idx 是包括在重叠部分中的
+		// 下面需要判断B物体其余边是否与A物体重叠
+		arbiter::contact_list contacts = { {b, idx},
+										{b, next_idx} };
+		auto clipped_contacts = contacts;
+		// 遍历A物体
+		for (size_t i = 0; i < a.count(); ++i) {
+			if (i == ia) { // 非SAT轴的边
+				continue;
+			}
+			// 起点
+			auto v0 = a.get_world_position() + a[i];
+			// 终点
+			auto v1 = a.get_world_position() + a[(i + 1) % a.count()];
+			auto num = clip(clipped_contacts, contacts, i, v0, v1);
+			if (num < 2) {
+				id = MAKE_ID(*a.get_id(), *b.get_id());
+				return nullptr;
+			}
+			assert(num == 2);
+			contacts = clipped_contacts;
+		}
+
+		auto va = a.get_world_position() + a[ia];
+		auto arbiter = world::create_arbiter(*_pa, *_pb, N);
+		for (auto &contact : clipped_contacts) {
+			auto sep = dot(contact.position - va, N);
+			if (sep <= 0) {
+				contact.separation = sep;
+				contact.ra = contact.position - a.get_world_position() + a.get_centroid();
+				contact.rb = contact.position - b.get_world_position() + b.get_centroid();
+				arbiter->add_contact(contact);
+			}
+		}
+		id = MAKE_ID(*a.get_id(), *b.get_id());
+		return arbiter;
+	}
+
 }

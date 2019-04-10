@@ -60,7 +60,7 @@ namespace heracles {
 		static auto diff_time();
 
 		// 绑定刚体对象的顶点，新创建的刚体只需要调用一次该函数
-		static void bind_vertex_array();
+		static void bind_vertex_array(rigid_body::ptr body);
 
 		// 渲染
 		static void display();

@@ -8,6 +8,44 @@ namespace heracles {
 	void world::clear() { bodies_.clear(); }
 
 	void world::step(const float dt) {
+		// 碰撞检测
+		for (size_t i = 0; i < bodies_.size(); ++i) {
+			for (size_t j = i + 1; j < bodies_.size(); ++j) {
+				auto a = std::dynamic_pointer_cast<rigid_body>(bodies_[i]);
+				auto b = std::dynamic_pointer_cast<rigid_body>(bodies_[j]);
+				if (!a->can_collide(*b)) {
+					continue;
+				}
+				uint32_t id;
+				auto arbiter = arbiter::is_collide(a, b, id);
+				auto iter = arbiters_.find(id);
+				if (arbiter == nullptr) {
+					if (iter != arbiters_.end()) {
+						arbiters_.erase(id);
+					}
+				}
+				else if (iter == arbiters_.end()) {
+					arbiters_[id] = arbiter;
+				}
+				else {
+					auto &old_arbiter = iter->second;
+					arbiter->update(*old_arbiter);
+					arbiters_[id] = arbiter;
+				}
+			}
+		}
+		for (auto &kv : arbiters_) {
+			kv.second->pre_step(dt);
+		}
+
+		// 更新动量
+		for (size_t i = 0; i < iterations_; ++i) {
+			for (auto &kv : arbiters_) {
+				kv.second->update_impulse();
+			}
+		}
+
+		// 更新外力
 		for (auto& body : bodies_)
 			body->update_force(g_, dt);
 	}
@@ -16,36 +54,50 @@ namespace heracles {
 
 	const world::body_list& world::get_bodies() const { return bodies_; }
 
+	const world::arbiter_list &world::get_arbiters() const { return arbiters_; }
+
 	const vec2& world::get_g() const { return g_; }
 
-	rigid_body::ptr world::create_rigid_body(const std::string type, const float mass, const mat22* scale,
-														 const vec2& world_position) const {
-		auto vertices = &body::template_map[type];
-		auto body = std::make_shared<rigid_body>(body::type_map[type], mass, vertices, scale);
+	rigid_body::ptr world::create_ground(const float width, const float height, const vec2& world_position)
+	{
+		rigid_body::vertex_list vertices = {
+			vec2( width / 2,  height / 2),
+			vec2(-width / 2,  height / 2),
+			vec2(-width / 2, -height / 2),
+			vec2( width / 2, -height / 2)
+		};
+		auto body = std::make_shared<rigid_body>(NULL, inf, vertices);
 		body->set_world_position(world_position);
 		return body;
 	}
 
-	rigid_body::ptr world::create_point(const vec2& world_position) const {
-		const auto s = new mat22{ 0.0017f, 0.0f, 0.0f,  0.0017f };
-		return create_rigid_body("point", inf, s, world_position);
+	rigid_body::ptr world::create_triangle(const float mass, const float base, const float height,
+										   const vec2& world_position) {
+		rigid_body::vertex_list vertices = {
+			vec2(		 0,  height / 2),
+			vec2(-base / 2, -height / 2),
+			vec2( base / 2, -height / 2)
+		};
+		auto body = std::make_shared<rigid_body>(NULL, mass, vertices);
+		body->set_world_position(world_position);
+		return body;
 	}
 
-	rigid_body::ptr world::create_line(const float length, const vec2& world_position) const {
-		const auto scale = new mat22{ length / 2.0f, 0.0f, 0.0f,  0.0017f };
-		return create_rigid_body("line", inf, scale, world_position);
+	rigid_body::ptr world::create_rectangle(const float mass, const float width, const float height,
+											const vec2& world_position) {
+		rigid_body::vertex_list vertices = {
+			vec2( width / 2,  height / 2),
+			vec2(-width / 2,  height / 2),
+			vec2(-width / 2, -height / 2),
+			vec2( width / 2, -height / 2)
+		};
+		auto body = std::make_shared<rigid_body>(NULL, mass, vertices);
+		body->set_world_position(world_position);
+		return body;
 	}
 
-	rigid_body::ptr world::create_triangle(const float mass, const float base, const float height, 
-										   const vec2& world_position) const {
-		const auto scale = new mat22{ base / 3.46f, 0.0f, 0.0f,  height / 3.0f };
-		return create_rigid_body("triangle", mass, scale, world_position);
-	}
-
-	rigid_body::ptr world::create_rectangle(const float mass, const float width, const float height, 
-											const vec2& world_position) const {
-		const auto scale = new mat22{ width / 4.0f, 0.0f, 0.0f,  height / 4.0f };
-		return create_rigid_body("rectangle", mass, scale, world_position);
+	arbiter::ptr world::create_arbiter(body::ptr a, body::ptr b, const vec2 & normal, const arbiter::contact_list & contacts) {
+		return std::make_shared<arbiter>(a, b, normal, contacts);
 	}
 
 }
