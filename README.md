@@ -4,15 +4,9 @@ Simple 2D Physics Engine
 
 ## Collaborators
 
-[AsrielMao](https://github.com/AsrielMao)
-
 [callMeBigBen](https://github.com/callMeBigBen)
 
 [ctwDuyh](https://github.com/ctwDuyh) 
-
-[FantasyD](https://github.com/FantasyD)
-
-[HeronZhao](https://github.com/HeronZhao)
 
 [MrZse](https://github.com/MrZse)
 
@@ -65,6 +59,8 @@ Simple 2D Physics Engine
    多边形计算面积：https://www.cnblogs.com/xiexinxinlove/p/3708147.html
 
    多边形计算质心：https://blog.csdn.net/nhl19961226/article/details/68941585
+
+   判断点是否在多边形内部：https://www.cnblogs.com/anningwang/p/7581545.html
 
 6. Physics
 

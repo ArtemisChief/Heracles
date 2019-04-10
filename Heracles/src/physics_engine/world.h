@@ -22,6 +22,9 @@ namespace heracles {
 		void lock();
 		void unlock();
 
+		rigid_body::ptr check_point_in_poly(vec2& point);
+		void add_impulse(rigid_body::ptr rigid_body,vec2& force);
+
 		void add(const body::ptr body);
 		const vec2& get_g() const;
 		const body_list& get_bodies() const;

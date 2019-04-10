@@ -153,7 +153,7 @@ namespace heracles {
 		
 		the_world_->lock();
 		for (auto &body : the_world_->get_bodies()) {
-			draw_body(*std::dynamic_pointer_cast<rigid_body>(body).get());
+			draw_body(*std::dynamic_pointer_cast<rigid_body>(body));
 
 			//draw_text(false, std::string("   World Pos:").append
 			//		(std::to_string(body->get_world_position().x).append
@@ -197,20 +197,39 @@ namespace heracles {
 
 	// 鼠标按键回调函数
 	double x0, y0;
+	rigid_body::ptr rb;
 	void graphic_renderer::mouse_callback(GLFWwindow* window, const int button, const int action, const int mods) {
 		
 		if (action == GLFW_PRESS) switch (button) {
 		//鼠标左键放置刚体
 		case GLFW_MOUSE_BUTTON_LEFT: {
+			std::cout << "MOUSE_BUTTON_LEFT Press" << std::endl;
 			glfwGetCursorPos(window, &x0, &y0);
 			const auto half_width = win_width_ / 2.0f;
 			const auto half_height = win_height_ / 2.0f;
 			x0 = (x0 - half_width) / half_width;
 			y0 = (-y0 + half_height) / half_height;
-			std::cout << "MOUSE_BUTTON_LEFT Press" << std::endl;
+			break;
 		}
+
 		// 鼠标右键给某个刚体施加力
 		case GLFW_MOUSE_BUTTON_RIGHT: {
+			std::cout << "MOUSE_BUTTON_RIGHT Press" << std::endl;
+			glfwGetCursorPos(window, &x0, &y0);
+			const auto half_width = win_width_ / 2.0f;
+			const auto half_height = win_height_ / 2.0f;
+
+			x0 = (x0 - half_width) / half_width;
+			y0 = (-y0 + half_height) / half_height;
+
+			vec2 pos(x0, y0);
+			pos = projection_.inv() * pos + view_;
+
+			std::cout << "MOUSE_BUTTON_RIGHT Pos: ["<<pos.x<<", "<<pos.y<<"]" << std::endl;
+
+			the_world_->lock();
+			rb = the_world_->check_point_in_poly(pos);
+			the_world_->unlock();
 			break;
 		}
 		default:;
@@ -243,10 +262,10 @@ namespace heracles {
 				body = the_world_->create_ground(width_height.x, width_height.y, pos);
 				break;
 			case 2:
-				body = the_world_->create_triangle(width_height.x*width_height.y / 2 * 100, width_height.x, width_height.y, pos);
+				body = the_world_->create_triangle(width_height.x*width_height.y / 2 * 50.0f, width_height.x, width_height.y, pos);
 				break;
 			case 3:
-				body = the_world_->create_rectangle(width_height.x*width_height.y, width_height.x, width_height.y, pos);
+				body = the_world_->create_rectangle(width_height.x*width_height.y * 50.0f, width_height.x, width_height.y, pos);
 				break;
 			default:
 				return;
@@ -261,6 +280,22 @@ namespace heracles {
 			break;
 		}
 		case GLFW_MOUSE_BUTTON_RIGHT:
+			std::cout << "MOUSE_BUTTON_LEFT Release" << std::endl;
+			if (rb) {
+				double x1, y1;
+				glfwGetCursorPos(window, &x1, &y1);
+				const auto half_width = win_width_ / 2.0f;
+				const auto half_height = win_height_ / 2.0f;
+
+				x1 = (x1 - half_width) / half_width;
+				y1 = (-y1 + half_height) / half_height;
+
+				vec2 force(x0 - x1, y0 - y1);
+				force = projection_.inv() * force;
+
+				the_world_->add_impulse(rb, force);
+				std::cout << "Force: [" << force.x << ", " << force.y << "]" << std::endl;
+			}
 			break;
 		default:
 			break;

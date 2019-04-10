@@ -61,6 +61,45 @@ namespace heracles {
 		mutex_.unlock();
 	}
 
+	rigid_body::ptr world::check_point_in_poly(vec2& point) {
+		if (!bodies_.empty()) {
+			// 找到距离point最近的body
+			body::ptr body;
+			auto min_distance = inf;
+
+			for (auto &b : bodies_) {
+				const auto distance = (b->get_world_position() - point).magnitude();
+				if (distance < min_distance) {
+					min_distance = distance;
+					body = b;
+				}
+			}
+
+			std::cout << "The id of closed body: " << body->get_id() << std::endl;
+
+			// 检测point是否在body内部
+			auto result = false;
+			const auto rb = std::dynamic_pointer_cast<rigid_body>(body);
+			const int n = rb->get_vertices().size();
+			for (auto i = 0, j = n - 1; i < n; j = i++) {
+				const auto verti = (*rb)[i] + rb->get_world_position();
+				const auto vertj = (*rb)[j] + rb->get_world_position();
+				if (verti.y > point.y != vertj.y > point.y &&
+					point.x < (vertj.x - verti.x) * (point.y - verti.y) / (vertj.y - verti.y) + verti.x)
+					result = !result;
+			}
+
+			if (result)
+				return rb;
+		}
+
+		return nullptr;
+	}
+
+	void world::add_impulse(rigid_body::ptr rigid_body, vec2& force) {
+		rigid_body->update_impulse(force * rigid_body->get_mass() * 5.0f, vec2());
+	}
+
 	void world::add(const body::ptr body) { bodies_.push_back(body); }
 
 	const world::body_list& world::get_bodies() const { return bodies_; }
