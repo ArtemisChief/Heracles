@@ -5,7 +5,10 @@ namespace heracles {
 
 	world::world(const vec2& g) :g_(g) {}
 
-	void world::clear() { bodies_.clear(); }
+	void world::clear() {
+		arbiters_.clear();
+		bodies_.clear();
+	}
 
 	void world::step(const float dt) {
 		// 碰撞检测
@@ -48,6 +51,14 @@ namespace heracles {
 		// 更新外力
 		for (auto& body : bodies_)
 			body->update_force(g_, dt);
+	}
+
+	void world::lock() {
+		mutex_.lock();
+	}
+
+	void world::unlock() {
+		mutex_.unlock();
 	}
 
 	void world::add(const body::ptr body) { bodies_.push_back(body); }

@@ -19,6 +19,9 @@ namespace heracles {
 		void clear();
 		void step(const float dt);	//世界处理一次运算
 
+		void lock();
+		void unlock();
+
 		void add(const body::ptr body);
 		const vec2& get_g() const;
 		const body_list& get_bodies() const;
@@ -44,6 +47,8 @@ namespace heracles {
 		body_list bodies_;
 		arbiter_list arbiters_;
 		size_t iterations_{ 10 };
+
+		std::mutex mutex_;
 	};
 
 }

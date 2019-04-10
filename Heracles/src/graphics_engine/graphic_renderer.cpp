@@ -151,6 +151,7 @@ namespace heracles {
 	void graphic_renderer::display() {
 		glClear(GL_COLOR_BUFFER_BIT);
 		
+		the_world_->lock();
 		for (auto &body : the_world_->get_bodies()) {
 			draw_body(*std::dynamic_pointer_cast<rigid_body>(body).get());
 
@@ -162,6 +163,7 @@ namespace heracles {
 			//		  body->get_world_position().x, body->get_world_position().y, 1.0f,
 			//		  1.0f, 1.0f, 1.0f);
 		}
+		the_world_->unlock();
 
 		draw_text(true, "Heracles", (-win_width_+30.0f)/2.0f, (win_height_-100.0f)/2.0f, 1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -180,7 +182,9 @@ namespace heracles {
 
 			if (!is_paused) {
 				// 世界运行一个步长（Step）的运算
+				the_world_->lock();
 				the_world_->step(dt);
+				the_world_->unlock();
 			}
 		}
 	}
@@ -232,6 +236,7 @@ namespace heracles {
 			width_height = projection_.inv() * width_height;
 
 			rigid_body::ptr body;
+			the_world_->lock();
 			// 世界创造刚体
 			switch (type) {
 			case 1:
@@ -250,6 +255,7 @@ namespace heracles {
 			bind_vertex_array(body);
 
 			the_world_->add(body);
+			the_world_->unlock();
 
 			std::cout << "Create Box (" << body->get_id() << ") : [" << pos.x << " " << pos.y << "]" << std::endl;
 			break;
@@ -282,6 +288,12 @@ namespace heracles {
 
 		if ((key == GLFW_KEY_1 || key == GLFW_KEY_2 || key == GLFW_KEY_3 || key == GLFW_KEY_4) && action == GLFW_PRESS)
 			type = key - 48;
+
+		if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+			the_world_->lock();
+			the_world_->clear();
+			the_world_->unlock();
+		}
 	}
 
 	// 处理输入
