@@ -10,7 +10,7 @@
 namespace heracles {
 
 	int type = 1;
-	bool show_info = false;
+	bool show_info = true;
 	unsigned int point;
 
 	// ´°¿Ú
