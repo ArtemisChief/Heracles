@@ -4,13 +4,14 @@
 #include "graphic_renderer.h"
 #include "resource_manager.h"
 #include <cstdarg>
-#include <cstdarg>
-#include <cstdarg>
+#include <atomic>
 #include <random>
 
 namespace heracles {
 
 	int type = 1;
+	bool show_info = false;
+	unsigned int point;
 
 	// 窗口
 	GLFWwindow* graphic_renderer::window_ = nullptr;
@@ -42,6 +43,17 @@ namespace heracles {
 		}
 
 		shader_program_.set_vec2(name, v);
+	}
+
+	void graphic_renderer::set_shader(const char* shader_name, const char* name, const float x, const float y, const float z) {
+		const auto temp = resource_manager::get_shader(shader_name);
+
+		if (shader_program_.id != temp.id) {
+			shader_program_ = temp;
+			shader_program_.use();
+		}
+
+		shader_program_.set_vec3(name, x, y, z);
 	}
 
 	void graphic_renderer::set_shader(const char* shader_name, const char* name, const mat22 m) {
@@ -76,20 +88,34 @@ namespace heracles {
 	void graphic_renderer::draw_body(rigid_body& body) {
 		set_shader("graphic", "translation", body.get_world_position());
 		set_shader("graphic", "rotation", body.get_rotation());
+		set_shader("graphic", "anchor", body.get_centroid());
 
 		//resource_manager::get_texture("test1").bind();
 		glBindVertexArray(*body.get_id());
-		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
+		set_shader("graphic", "color", 0.41f, 0.41f, 0.41f);
+		glDrawArrays(GL_TRIANGLE_FAN, 0, body.count());
+		set_shader("graphic", "color", 0.9f, 0.9f, 0.9f);
+		glDrawArrays(GL_LINE_LOOP, 0, body.count());
 	}
 
-	// 绘制铰链
-	void graphic_renderer::draw_joint() {
+	// 绘制接触点
+	void graphic_renderer::draw_contact(const arbiter::ptr& arbiter) {
+		glBindVertexArray(point);
 
+		auto &contacts = arbiter->get_contacts();
+		for(auto contact:contacts)
+		{
+			set_shader("graphic", "translation", contact.position);
+			set_shader("graphic", "rotation", mat22::i);
+			set_shader("graphic", "anchor", vec2(0,0));
+			set_shader("graphic", "color", 1.0f, 0.2f, 0.2f);
+			glDrawArrays(GL_POINTS, 0, 1);
+		}
 	}
 
 	// 标题栏显示dt
-	void graphic_renderer::update_title(const double dt) {
+	void graphic_renderer::update_title(const float dt) {
 		std::stringstream ss;
 		ss << "Heracles - dt: " << std::to_string(dt * 1000).substr(0, 5) << " ms";
 		glfwSetWindowTitle(window_, ss.str().c_str());
@@ -112,12 +138,12 @@ namespace heracles {
 		auto vertices = body->get_vertices();
 		const auto size = sizeof(float) * vertices.size() * 2;
 
-		float tex_coord[] = {
-			0.0f, 0.0f,
-			0.0f, 1.0f,
-			1.0f, 0.0f,
-			1.0f, 1.0f
-		};
+		//float tex_coord[] = {
+		//	0.0f, 0.0f,
+		//	0.0f, 1.0f,
+		//	1.0f, 0.0f,
+		//	1.0f, 1.0f
+		//};
 
 		// 设置顶点数组，配置顶点数组对象（VAO）与顶点缓冲对象（VBO）
 		auto& vao = *body->get_id();
@@ -133,15 +159,14 @@ namespace heracles {
 
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<void*>(size));
-		glEnableVertexAttribArray(1);
+		//glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<void*>(size));
+		//glEnableVertexAttribArray(1);
 
 		glBufferSubData(GL_ARRAY_BUFFER, 0, size, &vertices[0]);
-		glBufferSubData(GL_ARRAY_BUFFER, size, size, tex_coord);
-
+		
 		// 加载纹理
+		//glBufferSubData(GL_ARRAY_BUFFER, size, size, tex_coord);
 		//resource_manager::load_texture("src/resources/container.jpg", "test1");
-
 		//glBindBuffer(GL_ARRAY_BUFFER, 0);
 		//glBindVertexArray(0);
 
@@ -149,19 +174,18 @@ namespace heracles {
 
 	// 渲染 - 所有 OpenGL 绘制放在这里进行
 	void graphic_renderer::display() {
+		glClearColor(0.117f, 0.117f, 0.117f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		
 		the_world_->lock();
 		for (auto &body : the_world_->get_bodies()) {
 			draw_body(*std::dynamic_pointer_cast<rigid_body>(body));
+		}
 
-			//draw_text(false, std::string("   World Pos:").append
-			//		(std::to_string(body->get_world_position().x).append
-			//		(std::string(", ").append
-			//		(std::to_string(body->get_world_position().y)).append
-			//		(std::string("  Velocity: ").append(std::to_string(body->get_velocity().magnitude()))))),
-			//		  body->get_world_position().x, body->get_world_position().y, 1.0f,
-			//		  1.0f, 1.0f, 1.0f);
+		if (show_info) {
+			for (auto &arbiter : the_world_->get_arbiters()) {
+				draw_contact(arbiter.second);
+			}
 		}
 		the_world_->unlock();
 
@@ -177,13 +201,13 @@ namespace heracles {
 	void graphic_renderer::heracles_run() {
 		using namespace std::chrono_literals;
 		while (!should_stop) {
-			std::this_thread::sleep_for(10ms);
+			std::this_thread::sleep_for(5ms);
 			auto dt = diff_time().count();
 
 			if (!is_paused) {
 				// 世界运行一个步长（Step）的运算
 				the_world_->lock();
-				the_world_->step(dt);
+				the_world_->step(std::min(dt, 0.01));
 				the_world_->unlock();
 			}
 		}
@@ -203,7 +227,6 @@ namespace heracles {
 		if (action == GLFW_PRESS) switch (button) {
 		//鼠标左键放置刚体
 		case GLFW_MOUSE_BUTTON_LEFT: {
-			std::cout << "MOUSE_BUTTON_LEFT Press" << std::endl;
 			glfwGetCursorPos(window, &x0, &y0);
 			const auto half_width = win_width_ / 2.0f;
 			const auto half_height = win_height_ / 2.0f;
@@ -214,7 +237,6 @@ namespace heracles {
 
 		// 鼠标右键给某个刚体施加力
 		case GLFW_MOUSE_BUTTON_RIGHT: {
-			std::cout << "MOUSE_BUTTON_RIGHT Press" << std::endl;
 			glfwGetCursorPos(window, &x0, &y0);
 			const auto half_width = win_width_ / 2.0f;
 			const auto half_height = win_height_ / 2.0f;
@@ -224,8 +246,6 @@ namespace heracles {
 
 			vec2 pos(x0, y0);
 			pos = projection_.inv() * pos + view_;
-
-			std::cout << "MOUSE_BUTTON_RIGHT Pos: ["<<pos.x<<", "<<pos.y<<"]" << std::endl;
 
 			the_world_->lock();
 			rb = the_world_->check_point_in_poly(pos);
@@ -237,7 +257,6 @@ namespace heracles {
 
 		if (action == GLFW_RELEASE) switch (button) {
 		case GLFW_MOUSE_BUTTON_LEFT: {
-			std::cout << "MOUSE_BUTTON_LEFT Release" << std::endl;
 
 			double x1, y1;
 			glfwGetCursorPos(window, &x1, &y1);
@@ -268,6 +287,7 @@ namespace heracles {
 				body = the_world_->create_rectangle(width_height.x*width_height.y * 50.0f, width_height.x, width_height.y, pos);
 				break;
 			default:
+				the_world_->unlock();
 				return;
 			}
 
@@ -280,7 +300,6 @@ namespace heracles {
 			break;
 		}
 		case GLFW_MOUSE_BUTTON_RIGHT:
-			std::cout << "MOUSE_BUTTON_LEFT Release" << std::endl;
 			if (rb) {
 				double x1, y1;
 				glfwGetCursorPos(window, &x1, &y1);
@@ -294,7 +313,6 @@ namespace heracles {
 				force = projection_.inv() * force;
 
 				the_world_->add_impulse(rb, force);
-				std::cout << "Force: [" << force.x << ", " << force.y << "]" << std::endl;
 			}
 			break;
 		default:
@@ -321,6 +339,9 @@ namespace heracles {
 		if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
 			is_paused = !is_paused;
 
+		if (key == GLFW_KEY_TAB && action == GLFW_PRESS)
+			show_info = !show_info;
+
 		if ((key == GLFW_KEY_1 || key == GLFW_KEY_2 || key == GLFW_KEY_3 || key == GLFW_KEY_4) && action == GLFW_PRESS)
 			type = key - 48;
 
@@ -329,26 +350,140 @@ namespace heracles {
 			the_world_->clear();
 			the_world_->unlock();
 		}
+
+		// 金字塔Demo
+		if (key == GLFW_KEY_F1 && action == GLFW_PRESS) {
+			the_world_->lock();
+			the_world_->clear();
+
+			auto body = the_world_->create_ground(10, 0.3, vec2(0, -2.25));
+			bind_vertex_array(body);
+			the_world_->add(body);
+
+			vec2 x(-1.0f, -1.0f);
+			for (auto i = 0; i < 5; ++i) {
+				auto y = x;
+				for (auto j = i; j < 5; ++j) {
+					body = the_world_->create_rectangle(10, 0.45, 0.45, y);
+					body->set_friction(0.2);
+					bind_vertex_array(body);
+					the_world_->add(body);
+					y += vec2(0.6f, 0.0f);
+				}
+				x += vec2(0.3f, 0.6f);
+			}
+
+			the_world_->unlock();
+		}
+
+		//铰链Demo
+		if (key == GLFW_KEY_F2 && action == GLFW_PRESS) {
+			the_world_->lock();
+			the_world_->clear();
+
+			const auto ground = the_world_->create_ground(10, 0.3, vec2(0, -2.25));
+			ground->set_friction(0.4);
+			bind_vertex_array(ground);
+			the_world_->add(ground);
+
+			const auto mass = 10.0f;
+			const auto y = 2.0f;
+
+			auto last = ground;
+			for (auto i = 0; i < 15; ++i) {
+				auto box = the_world_->create_rectangle(mass, 0.2, 0.075, vec2(0.15 + 0.35 * i, y));
+				box->set_friction(0.4);
+				bind_vertex_array(box);
+				the_world_->add(box);
+				const auto joint = the_world_->create_revolute_joint(last, box, vec2(0.35 * i, y));
+				the_world_->add(joint);
+				last = box;
+			}
+
+			the_world_->unlock();
+		}
+
+		//多米诺Demo
+		if (key == GLFW_KEY_F3 && action == GLFW_PRESS) {
+			the_world_->lock();
+			the_world_->clear();
+
+			const auto ground = the_world_->create_ground(20, 0.3, vec2(5, -2.25));
+			ground->set_friction(0.8);
+			bind_vertex_array(ground);
+			the_world_->add(ground);
+
+			const auto platform = the_world_->create_ground(1, 0.15, vec2(-3.5, 0));
+			ground->set_friction(0.2);
+			bind_vertex_array(platform);
+			the_world_->add(platform);
+
+			auto bullet = the_world_->create_rectangle(20, 0.3, 0.3, vec2(-3.8, 0.3));
+			bullet->set_friction(0.8);
+			bind_vertex_array(bullet);
+			the_world_->add(bullet);
+
+			for (auto i = 0; i < 20; ++i) {
+				auto box = the_world_->create_rectangle(20, 0.15, 2.5, vec2(-2.8 +  0.7 * i, -0.75));
+				box->set_friction(0.8);
+				bind_vertex_array(box);
+				the_world_->add(box);
+			}
+
+			the_world_->unlock();
+		}
+
+		// 愤怒的小鸟Demo
+		if (key == GLFW_KEY_F4 && action == GLFW_PRESS) {
+			the_world_->lock();
+			the_world_->clear();
+
+			const auto ground = the_world_->create_ground(10, 0.3, vec2(0, -2.25));
+			ground->set_friction(0.95);
+			bind_vertex_array(ground);
+			the_world_->add(ground);
+
+			const auto platform = the_world_->create_ground(0.5, 0.15, vec2(-2.8, -1.1));
+			ground->set_friction(0.2);
+			bind_vertex_array(platform);
+			the_world_->add(platform);
+
+			auto bird = the_world_->create_rectangle(10, 0.3, 0.3, vec2(-2.8, -0.8));
+			bird->set_friction(0.95);
+			bind_vertex_array(bird);
+			the_world_->add(bird);
+
+			for (auto i = 0; i < 4; ++i) {
+				auto box1 = the_world_->create_rectangle(5, 0.25, 0.8, vec2(2.8, -1.7 + 0.93 * i));
+				box1->set_friction(0.95);
+				bind_vertex_array(box1);
+				the_world_->add(box1);
+
+				auto box2 = the_world_->create_rectangle(5, 0.25, 0.8, vec2(3.5, -1.7 + 0.93 * i));
+				box2->set_friction(0.95);
+				bind_vertex_array(box2);
+				the_world_->add(box2);
+
+				auto box3 = the_world_->create_rectangle(5, 0.1, 1.0, vec2(3.15, -1.235 + 0.93 * i));
+				box3->set_friction(0.95);
+				box3->set_rotation(pi/2);
+				bind_vertex_array(box3);
+				the_world_->add(box3);
+			}
+
+			auto top = the_world_->create_triangle(5, 1.0, 0.6, vec2(3.15, 2.0));
+			top->set_friction(0.95);
+			bind_vertex_array(top);
+			the_world_->add(top);
+
+			the_world_->unlock();
+		}
 	}
 
 	// 处理输入
 	void graphic_renderer::process_input() {
 		if (glfwGetKey(window_, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			glfwSetWindowShouldClose(window_, true);
-
-		//if(glfwGetMouseButton(window_,GLFW_MOUSE_BUTTON_LEFT)==GLFW_PRESS)
-		//{
-		//	double x, y;
-		//	glfwGetCursorPos(window_, &x, &y);
-		//	const auto half_width = win_width_ / 2;
-		//	const auto half_height = win_height_ / 2;
-		//	vec2 pos((x - half_width) / half_width, (-y + half_height) / half_height);
-		//	pos = projection_.inv() * pos + view_;
-
-		//	// 世界创造刚体
-		//	const auto body = the_world_->create_rectangle(1, 0.1, 0.1, pos);
-		//	the_world_->add(body);
-		//}
 
 		auto camera_speed = 0.02f;
 		if (glfwGetKey(window_, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
@@ -375,8 +510,6 @@ namespace heracles {
 		set_shader("graphic", "projection", projection_);
 	}
 
-
-
 	// 初始化
 	int graphic_renderer::init() {
 		// glfw初始化
@@ -388,7 +521,6 @@ namespace heracles {
 		// 多重采样抗锯齿倍数
 		glfwWindowHint(GLFW_SAMPLES, 4);
 		
-
 		// glfw窗口创建
 		window_ = glfwCreateWindow(win_width_, win_height_, "Heracles", nullptr, nullptr);
 		if (window_ == nullptr) {
@@ -429,6 +561,21 @@ namespace heracles {
 
 		// 线框模式
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+		// 设置点的顶点数组
+		auto p = vec2(0, 0);
+		unsigned int vbo;
+		glGenVertexArrays(1, &point);
+		glGenBuffers(1, &vbo);
+		glBindVertexArray(point);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof p, &p, GL_STATIC_DRAW);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
+		glEnableVertexAttribArray(0);
+
+		// 设置点大小
+		glEnable(GL_PROGRAM_POINT_SIZE);
+		glPointSize(5.0);
 
 		// 构造世界
 		the_world_ = new world({ 0.0f, -9.8f });

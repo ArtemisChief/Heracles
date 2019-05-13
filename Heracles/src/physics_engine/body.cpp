@@ -1,9 +1,8 @@
 #include "body.h"
-#include <iostream>
 
 namespace heracles {
 
-	body::body(const uint16_t id, const float mass) :id_(id) { set_mass(mass); }
+	body::body(const float mass) :id_(0) { set_mass(mass); }
 
 	bool body::can_collide(const body& other) const { return !(mass_ == inf && other.mass_ == inf); }
 
@@ -53,7 +52,7 @@ namespace heracles {
 		const auto size = vertices.size();
 
 		for (size_t i = 0; i < size; ++i) {
-			auto j = (i + 1) % size;
+			const auto j = (i + 1) % size;
 			area += cross(vertices[i], vertices[j]);
 		}
 		return area / 2.0f;
@@ -65,7 +64,7 @@ namespace heracles {
 		const auto size = vertices.size();
 
 		for (size_t i = 0; i < size; ++i) {
-			auto j = (i + 1) % size;
+			const auto j = (i + 1) % size;
 			centroid += (vertices[i] + vertices[j]) * cross(vertices[i], vertices[j]);
 		}
 		return centroid / 6.0f / calculate_area(vertices);
@@ -85,17 +84,17 @@ namespace heracles {
 		return mass / 6 * sum / sum_area;
 	}
 
-	rigid_body::rigid_body(const unsigned int id, const float mass, vertex_list& vertices)
-					:body(id, mass), vertices_(vertices) {
+	rigid_body::rigid_body(const float mass, vertex_list& vertices)
+					:body(mass), vertices_(vertices) {
 		set_centroid(calculate_centroid(vertices_));
 		set_inertia(calculate_inertia(mass, vertices_));
 	}
 
 	size_t rigid_body::count() const { return vertices_.size(); }
 
-	vec2 rigid_body::operator[](size_t idx) const { return rotation_ * (vertices_[idx] - centroid_) + centroid_; }
+	vec2 rigid_body::operator[](const size_t idx) const { return rotation_ * (vertices_[idx] - centroid_) + centroid_; }
 
-	vec2 rigid_body::edge(size_t idx) const { return (*this)[(idx + 1) % vertices_.size()] - (*this)[idx]; }
+	vec2 rigid_body::edge(const size_t idx) const { return (*this)[(idx + 1) % vertices_.size()] - (*this)[idx]; }
 
 	body::vertex_list rigid_body::get_vertices() const { return vertices_; }
 

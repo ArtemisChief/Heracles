@@ -259,3 +259,9 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+/Documents/UML.png
+/Documents/4.3会议记录.md
+/Documents/4.10会议记录.md
+/Documents/3.27会议记录.md
+/Documents/3.20会议记录.md
+/Documents

@@ -1,8 +1,6 @@
 #pragma once
 #include <glad/glad.h>
 #include <map>
-
-#include "../util/math.h"
 #include "shader.h"
 
 namespace heracles {

@@ -7,6 +7,7 @@ namespace heracles {
 
 	void world::clear() {
 		arbiters_.clear();
+		joints_.clear();
 		bodies_.clear();
 	}
 
@@ -41,10 +42,18 @@ namespace heracles {
 			kv.second->pre_step(dt);
 		}
 
+		for (auto &joint : joints_) {
+			joint->pre_step(dt);
+		}
+
 		// 更新动量
 		for (size_t i = 0; i < iterations_; ++i) {
 			for (auto &kv : arbiters_) {
 				kv.second->update_impulse();
+			}
+
+			for (auto &joint : joints_) {
+				joint->update_impulse();
 			}
 		}
 
@@ -75,7 +84,8 @@ namespace heracles {
 				}
 			}
 
-			std::cout << "The id of closed body: " << body->get_id() << std::endl;
+			if (body->get_mass()==inf) 
+				return nullptr;
 
 			// 检测point是否在body内部
 			auto result = false;
@@ -102,21 +112,24 @@ namespace heracles {
 
 	void world::add(const body::ptr body) { bodies_.push_back(body); }
 
+	void world::add(const joint::ptr joint) { joints_.push_back(joint); }
+
 	const world::body_list& world::get_bodies() const { return bodies_; }
+
+	const world::joint_list& world::get_joints() const { return joints_; }
 
 	const world::arbiter_list &world::get_arbiters() const { return arbiters_; }
 
 	const vec2& world::get_g() const { return g_; }
 
-	rigid_body::ptr world::create_ground(const float width, const float height, const vec2& world_position)
-	{
+	rigid_body::ptr world::create_ground(const float width, const float height, const vec2& world_position) {
 		rigid_body::vertex_list vertices = {
-			vec2( width / 2,  height / 2),
+			vec2(width / 2,  height / 2),
 			vec2(-width / 2,  height / 2),
 			vec2(-width / 2, -height / 2),
-			vec2( width / 2, -height / 2)
+			vec2(width / 2, -height / 2)
 		};
-		auto body = std::make_shared<rigid_body>(NULL, inf, vertices);
+		auto body = std::make_shared<rigid_body>(inf, vertices);
 		body->set_world_position(world_position);
 		return body;
 	}
@@ -124,11 +137,11 @@ namespace heracles {
 	rigid_body::ptr world::create_triangle(const float mass, const float base, const float height,
 										   const vec2& world_position) {
 		rigid_body::vertex_list vertices = {
-			vec2(		 0,  height / 2),
+			vec2(0,  height / 2),
 			vec2(-base / 2, -height / 2),
-			vec2( base / 2, -height / 2)
+			vec2(base / 2, -height / 2)
 		};
-		auto body = std::make_shared<rigid_body>(NULL, mass, vertices);
+		auto body = std::make_shared<rigid_body>(mass, vertices);
 		body->set_world_position(world_position);
 		return body;
 	}
@@ -136,18 +149,22 @@ namespace heracles {
 	rigid_body::ptr world::create_rectangle(const float mass, const float width, const float height,
 											const vec2& world_position) {
 		rigid_body::vertex_list vertices = {
-			vec2( width / 2,  height / 2),
+			vec2(width / 2,  height / 2),
 			vec2(-width / 2,  height / 2),
 			vec2(-width / 2, -height / 2),
-			vec2( width / 2, -height / 2)
+			vec2(width / 2, -height / 2)
 		};
-		auto body = std::make_shared<rigid_body>(NULL, mass, vertices);
+		auto body = std::make_shared<rigid_body>(mass, vertices);
 		body->set_world_position(world_position);
 		return body;
 	}
 
 	arbiter::ptr world::create_arbiter(body::ptr a, body::ptr b, const vec2 & normal, const arbiter::contact_list & contacts) {
 		return std::make_shared<arbiter>(a, b, normal, contacts);
+	}
+
+	revolute_joint::ptr world::create_revolute_joint(body::ptr a, body::ptr b, const vec2& anchor) {
+		return std::make_shared<revolute_joint>(a, b, anchor);
 	}
 
 }

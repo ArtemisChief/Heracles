@@ -27,7 +27,7 @@ namespace heracles {
 		using vertex_list = std::vector<vec2>;
 		using ptr = std::shared_ptr < body >;
 
-		body(uint16_t id, float mass);
+		body(float mass);
 		virtual ~body() = default;
 
 		bool can_collide(const body& other) const;					// 是否可以发生碰撞（如刚体和地面返回false）
@@ -70,11 +70,11 @@ namespace heracles {
 	public:
 		using ptr = std::shared_ptr < rigid_body >;
 
-		rigid_body(const unsigned int id, const float mass, vertex_list& vertices);
+		rigid_body(const float mass, vertex_list& vertices);
 
 		size_t count() const;
-		vec2 operator[](size_t idx) const;
-		vec2 edge(size_t idx) const;
+		vec2 operator[](const size_t idx) const;
+		vec2 edge(const size_t idx) const;
 
 		vertex_list get_vertices() const;
 
