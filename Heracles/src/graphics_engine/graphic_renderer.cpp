@@ -201,7 +201,7 @@ namespace heracles {
 	void graphic_renderer::heracles_run() {
 		using namespace std::chrono_literals;
 		while (!should_stop) {
-			std::this_thread::sleep_for(5ms);
+			std::this_thread::sleep_for(10ms);
 			auto dt = diff_time().count();
 
 			if (!is_paused) {
@@ -360,11 +360,11 @@ namespace heracles {
 			bind_vertex_array(body);
 			the_world_->add(body);
 
-			vec2 x(-1.0f, -1.0f);
-			for (auto i = 0; i < 5; ++i) {
+			vec2 x(-2.5f, -1.0f);
+			for (auto i = 0; i < 9; ++i) {
 				auto y = x;
-				for (auto j = i; j < 5; ++j) {
-					body = the_world_->create_rectangle(10, 0.45, 0.45, y);
+				for (auto j = i; j < 9; ++j) {
+					body = the_world_->create_rectangle(10, 0.4, 0.4, y);
 					body->set_friction(0.2);
 					bind_vertex_array(body);
 					the_world_->add(body);
