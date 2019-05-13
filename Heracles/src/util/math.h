@@ -6,6 +6,7 @@
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \
     TypeName(const TypeName&) = delete; \
     const TypeName& operator=(const TypeName&) = delete;
+#define MAKE_ID(a, b) (((a)<(b))?(((a)<<16)|(b)):(((b)<<16)|(a)))
 
 namespace heracles {
 

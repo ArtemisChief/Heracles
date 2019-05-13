@@ -1,11 +1,9 @@
 #pragma once
-#include <atomic>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <thread>
 
 #include "shader.h"
-#include "../util/stb_image.h"
 #include "../physics_engine/body.h"
 #include "../physics_engine/world.h"
 #include "text.h"
@@ -40,6 +38,7 @@ namespace heracles {
 
 		// 切换/设置着色器
 		static void set_shader(const char* shader_name, const char* name, const vec2 v);
+		static void set_shader(const char* shader_name, const char* name, const float x, const float y, const float z);
 		static void set_shader(const char* shader_name, const char* name, const mat22 m);
 
 		// 绘制文字
@@ -50,17 +49,17 @@ namespace heracles {
 		// 绘制刚体
 		static void draw_body(rigid_body& body);
 
-		// 绘制铰链
-		static void draw_joint();
+		// 绘制接触点
+		static void draw_contact(const arbiter::ptr& arbiter);
 
 		// 标题栏显示dt
-		static void update_title(const double dt);
+		static void update_title(const float dt);
 
 		// 时钟同步
 		static auto diff_time();
 
 		// 绑定刚体对象的顶点，新创建的刚体只需要调用一次该函数
-		static void bind_vertex_array();
+		static void bind_vertex_array(rigid_body::ptr body);
 
 		// 渲染
 		static void display();

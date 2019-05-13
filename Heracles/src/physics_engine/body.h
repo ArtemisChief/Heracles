@@ -27,14 +27,7 @@ namespace heracles {
 		using vertex_list = std::vector<vec2>;
 		using ptr = std::shared_ptr < body >;
 
-		const static vertex_list point;
-		const static vertex_list line;
-		const static vertex_list triangle;
-		const static vertex_list rectangle;
-		static std::map<const std::string, unsigned int> type_map;
-		static std::map<const std::string, vertex_list> template_map;
-
-		body(uint16_t id, float mass);
+		body(float mass);
 		virtual ~body() = default;
 
 		bool can_collide(const body& other) const;					// 是否可以发生碰撞（如刚体和地面返回false）
@@ -72,20 +65,18 @@ namespace heracles {
 	protected:
 		
 		DISALLOW_COPY_AND_ASSIGN(rigid_body);
-		const vertex_list* vertices_;
-		const mat22* scale_;
+		const vertex_list vertices_;
 
 	public:
 		using ptr = std::shared_ptr < rigid_body >;
 
-		rigid_body(const unsigned int id, const float mass, const vertex_list* vertices, const mat22* scale);
+		rigid_body(const float mass, vertex_list& vertices);
 
 		size_t count() const;
-		vec2 operator[](size_t idx) const;
-		vec2 edge(size_t idx) const;
+		vec2 operator[](const size_t idx) const;
+		vec2 edge(const size_t idx) const;
 
 		vertex_list get_vertices() const;
-		mat22 get_scale() const;
 
 		/* 分离轴定理（SAT）
 		 * 检测两凸多边形是否相交
