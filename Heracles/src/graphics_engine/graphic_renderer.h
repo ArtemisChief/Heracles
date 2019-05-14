@@ -52,6 +52,9 @@ namespace heracles {
 		// 绘制接触点
 		static void draw_contact(const arbiter::ptr& arbiter);
 
+		// 显示UI
+		static void show_ui();
+
 		// 标题栏显示dt
 		static void update_title(const float dt);
 
@@ -66,6 +69,9 @@ namespace heracles {
 
 		// 物理引擎部分
 		static void heracles_run();
+
+		// 获取鼠标指向的物体
+		static void get_body_info();
 
 		// 摄像机移动
 		static void move_camera(const vec2 translation);

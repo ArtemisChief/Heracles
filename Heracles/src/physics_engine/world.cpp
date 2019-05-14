@@ -86,9 +86,6 @@ namespace heracles {
 				}
 			}
 
-			if (body->get_mass()==inf) 
-				return nullptr;
-
 			// 检测point是否在body内部
 			auto result = false;
 			const auto rb = std::dynamic_pointer_cast<rigid_body>(body);

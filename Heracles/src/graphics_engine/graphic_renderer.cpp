@@ -14,6 +14,8 @@ namespace heracles {
 	unsigned int point;
 	float g = 9.8f;
 	float k_bias_factor = 0.2f;
+	rigid_body::ptr curr_body;
+	rigid_body::ptr target_body;
 
 	// 窗口
 	GLFWwindow* graphic_renderer::window_ = nullptr;
@@ -97,8 +99,16 @@ namespace heracles {
 
 		set_shader("graphic", "color", 0.41f, 0.41f, 0.41f);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, body.count());
+
+		glLineWidth(2.0);
 		set_shader("graphic", "color", 0.9f, 0.9f, 0.9f);
 		glDrawArrays(GL_LINE_LOOP, 0, body.count());
+
+		if (show_info && body.get_id() == target_body->get_id()) {
+			glLineWidth(3.0);
+			set_shader("graphic", "color", 0.0f, 0.47f, 0.84f);
+			glDrawArrays(GL_LINE_LOOP, 0, body.count());
+		}
 	}
 
 	// 绘制接触点
@@ -115,6 +125,110 @@ namespace heracles {
 			glDrawArrays(GL_POINTS, 0, 1);
 		}
 	}
+
+	// 显示UI
+	void graphic_renderer::show_ui() {
+		if (show_info) {
+			draw_text(true, "Heracles", (-win_width_ + 30.0f) / 2.0f, (win_height_ - 100.0f) / 2.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+
+			switch (type) {
+			case 1:
+				draw_text(true, "Function: Set Position of Selected Body", (-win_width_ + 30.0f) / 2.0f, (win_height_ - 150.0f) / 2.0f, 0.4f, 1.0f, 1.0f, 1.0f);
+				break;
+			case 2:
+				draw_text(true, "Function: Place Triangle", (-win_width_ + 30.0f) / 2.0f, (win_height_ - 150.0f) / 2.0f, 0.4f, 1.0f, 1.0f, 1.0f);
+				break;
+			case 3:
+				draw_text(true, "Function: Place Rectangle", (-win_width_ + 30.0f) / 2.0f, (win_height_ - 150.0f) / 2.0f, 0.4f, 1.0f, 1.0f, 1.0f);
+				break;
+			case 4:
+				draw_text(true, "Function: Place Triangle Ground", (-win_width_ + 30.0f) / 2.0f, (win_height_ - 150.0f) / 2.0f, 0.4f, 1.0f, 1.0f, 1.0f);
+				break;
+			case 5:
+				draw_text(true, "Function: Place Rectangle Ground", (-win_width_ + 30.0f) / 2.0f, (win_height_ - 150.0f) / 2.0f, 0.4f, 1.0f, 1.0f, 1.0f);
+				break;
+			default: 
+				break;
+			}
+
+			std::string out = "Gravitational Acceleration: ";
+			std::stringstream g_stringstream;
+			g_stringstream << g;
+			if (g < 0)
+				out += "minus";
+			out += g_stringstream.str().substr(0, 4);
+
+			draw_text(true, out, (-win_width_ + 30.0f) / 2.0f, (win_height_ - 1770.0f) / 2.0f, 0.4f, 1.0f, 1.0f, 1.0f);
+
+			out = "K Bias Factor: ";
+			g_stringstream.str("");
+			g_stringstream << k_bias_factor;
+			out += g_stringstream.str().substr(0, 4);
+
+			draw_text(true, out, (-win_width_ + 30.0f) / 2.0f, (win_height_ - 1720.0f) / 2.0f, 0.4f, 1.0f, 1.0f, 1.0f);
+
+			draw_text(true, "Press F1 to F6 to load demo", (-win_width_ + 2744.0f) / 2.0f, (win_height_ - 70.0f) / 2.0f, 0.3f, 1.0f, 1.0f, 1.0f);
+			draw_text(true, "Press 1 to 5 to change function", (-win_width_ + 2682.0f) / 2.0f, (win_height_ - 110.0f) / 2.0f, 0.3f, 1.0f, 1.0f, 1.0f);
+			draw_text(true, "Press WASD to move and shift or ctrl to change speed", (-win_width_ + 2354.0f) / 2.0f, (win_height_ - 150.0f) / 2.0f, 0.3f, 1.0f, 1.0f, 1.0f);
+			draw_text(true, "Press Left Mouse Button to implement selected function", (-win_width_ + 2322.0f) / 2.0f, (win_height_ - 190.0f) / 2.0f, 0.3f, 1.0f, 1.0f, 1.0f);
+			draw_text(true, "Press Right Mouse Button to apply impulse on body", (-win_width_ + 2400.0f) / 2.0f, (win_height_ - 230.0f) / 2.0f, 0.3f, 1.0f, 1.0f, 1.0f);
+			draw_text(true, "Press Space to pause or resume", (-win_width_ + 2696.0f) / 2.0f, (win_height_ - 270.0f) / 2.0f, 0.3f, 1.0f, 1.0f, 1.0f);
+			draw_text(true, "Roll Scroll to zoom in or out", (-win_width_ + 2710.0f) / 2.0f, (win_height_ - 310.0f) / 2.0f, 0.3f, 1.0f, 1.0f, 1.0f);
+			draw_text(true, "Press Add or Divide to change Gravitational Acceleration", (-win_width_ + 2288.0f) / 2.0f, (win_height_ - 350.0f) / 2.0f, 0.3f, 1.0f, 1.0f, 1.0f);
+			draw_text(true, "Press Left or Right Bracket to change K Bias Factor", (-win_width_ + 2365.0f) / 2.0f, (win_height_ - 390.0f) / 2.0f, 0.3f, 1.0f, 1.0f, 1.0f);
+			draw_text(true, "Press Up or Down to change the Mass of selected body", (-win_width_ + 2348.0f) / 2.0f, (win_height_ - 430.0f) / 2.0f, 0.3f, 1.0f, 1.0f, 1.0f);
+			draw_text(true, "Press Left or Right to change Friction Factor of selected body", (-win_width_ + 2190.0f) / 2.0f, (win_height_ - 470.0f) / 2.0f, 0.3f, 1.0f, 1.0f, 1.0f);
+			draw_text(true, "Press Tab to toggle the UI", (-win_width_ + 2750.0f) / 2.0f, (win_height_ - 510.0f) / 2.0f, 0.3f, 1.0f, 1.0f, 1.0f);
+
+			if (curr_body != nullptr && curr_body != target_body)
+				target_body = curr_body;
+
+			if (target_body) {
+				const auto mass = target_body->get_mass();
+				if (mass == inf)
+					g_stringstream.str("inf");
+				else {
+					g_stringstream.str("");
+					g_stringstream << mass;
+				}
+				draw_text(true, "Mass: ", (-win_width_ + 2978.0f) / 2.0f, (win_height_ - 1570.0f) / 2.0f, 0.4f, 1.0f, 1.0f, 1.0f);
+				draw_text(true, g_stringstream.str().substr(0, 4), (-win_width_ + 3088.0f) / 2.0f, (win_height_ - 1570.0f) / 2.0f, 0.4f, 1.0f, 1.0f, 1.0f);
+
+				if (target_body->get_velocity().magnitude() >= -0.01 &&target_body->get_velocity().magnitude() <= 0.01)
+					g_stringstream.str("0.0");
+				else {
+					g_stringstream.str("");
+					g_stringstream << target_body->get_velocity().magnitude();
+				}
+				draw_text(true, "Speed: ", (-win_width_ + 2958.0f) / 2.0f, (win_height_ - 1620.0f) / 2.0f, 0.4f, 1.0f, 1.0f, 1.0f);
+				draw_text(true, g_stringstream.str().substr(0, 4), (-win_width_ + 3088.0f) / 2.0f, (win_height_ - 1620.0f) / 2.0f, 0.4f, 1.0f, 1.0f, 1.0f);
+
+				if(target_body->get_angular_velocity() >= -0.01 &&target_body->get_angular_velocity() <= 0.01)
+					g_stringstream.str("0.0");
+				else {
+					g_stringstream.str("");
+					g_stringstream << (target_body->get_angular_velocity() > 0 ? target_body->get_angular_velocity() : -target_body->get_angular_velocity());
+				}
+				draw_text(true, "Angular Speed: ", (-win_width_ + 2792.0f) / 2.0f, (win_height_ - 1670.0f) / 2.0f, 0.4f, 1.0f, 1.0f, 1.0f);
+				draw_text(true, g_stringstream.str().substr(0, 4), (-win_width_ + 3088.0f) / 2.0f, (win_height_ - 1670.0f) / 2.0f, 0.4f, 1.0f, 1.0f, 1.0f);
+
+				g_stringstream.str("");
+				g_stringstream << target_body->get_inertia();
+				draw_text(true, "Inertia: ", (-win_width_ + 2917.0f) / 2.0f, (win_height_ - 1720.0f) / 2.0f, 0.4f, 1.0f, 1.0f, 1.0f);
+				draw_text(true, g_stringstream.str().substr(0, 4), (-win_width_ + 3088.0f) / 2.0f, (win_height_ - 1720.0f) / 2.0f, 0.4f, 1.0f, 1.0f, 1.0f);
+
+				if (target_body->get_friction() >= -0.01 &&target_body->get_friction() <= 0.01)
+					g_stringstream.str("0.0");
+				else {
+					g_stringstream.str("");
+					g_stringstream << target_body->get_friction();
+				}
+				draw_text(true, "Friction Factor: ", (-win_width_ + 2751.0f) / 2.0f, (win_height_ - 1770.0f) / 2.0f, 0.4f, 1.0f, 1.0f, 1.0f);
+				draw_text(true, g_stringstream.str().substr(0, 4), (-win_width_ + 3088.0f) / 2.0f, (win_height_ - 1770.0f) / 2.0f, 0.4f, 1.0f, 1.0f, 1.0f);
+			}
+		}
+	}
+
 
 	// 标题栏显示dt
 	void graphic_renderer::update_title(const float dt) {
@@ -173,23 +287,9 @@ namespace heracles {
 		}
 		the_world_->unlock();
 
-		draw_text(true, "Heracles", (-win_width_ + 30.0f) / 2.0f, (win_height_ - 100.0f) / 2.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		get_body_info();
 
-		std::string out = "Gravitational acceleration: ";
-		std::stringstream g_stringstream;
-		g_stringstream << g;
-		if (g < 0)
-			out += "minus";
-		out += g_stringstream.str().substr(0, 4);
-
-		draw_text(true, out, (-win_width_ + 30.0f) / 2.0f, (win_height_ - 1770.0f) / 2.0f, 0.4f, 1.0f, 1.0f, 1.0f);
-
-		out = "K Bias Factor: ";
-		g_stringstream.str("");
-		g_stringstream << k_bias_factor;
-		out += g_stringstream.str().substr(0, 4);
-
-		draw_text(true, out, (-win_width_ + 30.0f) / 2.0f, (win_height_ - 1720.0f) / 2.0f, 0.4f, 1.0f, 1.0f, 1.0f);
+		show_ui();
 
 		// glfw双缓冲+处理事件
 		glfwSwapBuffers(window_);
@@ -219,25 +319,64 @@ namespace heracles {
 		set_shader("graphic", "view", view_);
 	}
 
+
+	// 获取鼠标指向的物体
+	void graphic_renderer::get_body_info() {
+		double x, y;
+		glfwGetCursorPos(window_, &x, &y);
+		const auto half_width = win_width_ / 2.0f;
+		const auto half_height = win_height_ / 2.0f;
+
+		x = (x - half_width) / half_width;
+		y = (-y + half_height) / half_height;
+
+		vec2 pos(x, y);
+		pos = projection_.inv() * pos + view_;
+
+		the_world_->lock();
+		curr_body = the_world_->check_point_in_poly(pos);
+		the_world_->unlock();
+	}
+
 	// 鼠标按键回调函数
 	double x0, y0;
 	rigid_body::ptr rb;
 	void graphic_renderer::mouse_callback(GLFWwindow* window, const int button, const int action, const int mods) {
-		
+
+		if (type == 1 && target_body && button == GLFW_MOUSE_BUTTON_LEFT && action==GLFW_PRESS) {
+			double x, y;
+			glfwGetCursorPos(window_, &x, &y);
+			const auto half_width = win_width_ / 2.0f;
+			const auto half_height = win_height_ / 2.0f;
+
+			x = (x - half_width) / half_width;
+			y = (-y + half_height) / half_height;
+
+			vec2 pos(x, y);
+			pos = projection_.inv() * pos + view_;
+
+			target_body->set_world_position(pos);
+			target_body->set_velocity(vec2(0, 0));
+			target_body->set_angular_velocity(0);
+		}
+
 		if (action == GLFW_PRESS) switch (button) {
 		//鼠标左键放置刚体
 		case GLFW_MOUSE_BUTTON_LEFT: {
-			glfwGetCursorPos(window, &x0, &y0);
-			const auto half_width = win_width_ / 2.0f;
-			const auto half_height = win_height_ / 2.0f;
-			x0 = (x0 - half_width) / half_width;
-			y0 = (-y0 + half_height) / half_height;
+			if (type != 1) {
+				glfwGetCursorPos(window, &x0, &y0);
+				const auto half_width = win_width_ / 2.0f;
+				const auto half_height = win_height_ / 2.0f;
+				x0 = (x0 - half_width) / half_width;
+				y0 = (-y0 + half_height) / half_height;
+
+			}
 			break;
 		}
 
 		// 鼠标右键给某个刚体施加力
 		case GLFW_MOUSE_BUTTON_RIGHT: {
-			glfwGetCursorPos(window, &x0, &y0);
+			glfwGetCursorPos(window_, &x0, &y0);
 			const auto half_width = win_width_ / 2.0f;
 			const auto half_height = win_height_ / 2.0f;
 
@@ -275,46 +414,50 @@ namespace heracles {
 
 		if (action == GLFW_RELEASE) switch (button) {
 		case GLFW_MOUSE_BUTTON_LEFT: {
+			if (type != 1) {
+				double x1, y1;
+				glfwGetCursorPos(window, &x1, &y1);
 
-			double x1, y1;
-			glfwGetCursorPos(window, &x1, &y1);
+				const auto half_width = win_width_ / 2.0f;
+				const auto half_height = win_height_ / 2.0f;
 
-			const auto half_width = win_width_ / 2.0f;
-			const auto half_height = win_height_ / 2.0f;
+				x1 = (x1 - half_width) / half_width;
+				y1 = (-y1 + half_height) / half_height;
 
-			x1 = (x1 - half_width) / half_width;
-			y1 = (-y1 + half_height) / half_height;
+				vec2 pos((x0 + x1) / 2.0f, (y0 + y1) / 2.0f);
+				pos = projection_.inv() * pos + view_;
 
-			vec2 pos((x0 + x1) / 2.0f, (y0 + y1) / 2.0f);
-			pos = projection_.inv() * pos + view_;
+				vec2 width_height(abs(x1 - x0), abs(y1 - y0));
+				width_height = projection_.inv() * width_height;
 
-			vec2 width_height(abs(x1 - x0), abs(y1 - y0));
-			width_height = projection_.inv() * width_height;
+				rigid_body::ptr body;
+				the_world_->lock();
+				// 世界创造刚体
+				switch (type) {
+				case 2:
+					body = the_world_->create_triangle(width_height.x*width_height.y / 2 * 50.0f, width_height.x, width_height.y, pos);
+					break;
+				case 3:
+					body = the_world_->create_rectangle(width_height.x*width_height.y * 50.0f, width_height.x, width_height.y, pos);
+					break;
+				case 4:
+					body = the_world_->create_tri_ground(width_height.x, width_height.y, pos);
+					break;
+				case 5:
+					body = the_world_->create_ground(width_height.x, width_height.y, pos);
+					break;
+				default:
+					the_world_->unlock();
+					return;
+				}
 
-			rigid_body::ptr body;
-			the_world_->lock();
-			// 世界创造刚体
-			switch (type) {
-			case 1:
-				body = the_world_->create_ground(width_height.x, width_height.y, pos);
-				break;
-			case 2:
-				body = the_world_->create_triangle(width_height.x*width_height.y / 2 * 50.0f, width_height.x, width_height.y, pos);
-				break;
-			case 3:
-				body = the_world_->create_rectangle(width_height.x*width_height.y * 50.0f, width_height.x, width_height.y, pos);
-				break;
-			default:
+				bind_vertex_array(body);
+
+				the_world_->add(body);
 				the_world_->unlock();
-				return;
+
+				std::cout << "Create Box (" << body->get_id() << ") : [" << pos.x << " " << pos.y << "]" << std::endl;
 			}
-
-			bind_vertex_array(body);
-
-			the_world_->add(body);
-			the_world_->unlock();
-
-			std::cout << "Create Box (" << body->get_id() << ") : [" << pos.x << " " << pos.y << "]" << std::endl;
 			break;
 		}
 		case GLFW_MOUSE_BUTTON_RIGHT:
@@ -366,7 +509,7 @@ namespace heracles {
 		if (key == GLFW_KEY_TAB && action == GLFW_PRESS)
 			show_info = !show_info;
 
-		if ((key == GLFW_KEY_1 || key == GLFW_KEY_2 || key == GLFW_KEY_3 || key == GLFW_KEY_4) && action == GLFW_PRESS)
+		if ((key == GLFW_KEY_1 || key == GLFW_KEY_2 || key == GLFW_KEY_3 || key == GLFW_KEY_4 || key==GLFW_KEY_5) && action == GLFW_PRESS)
 			type = key - 48;
 
 		if (key == GLFW_KEY_R && action == GLFW_PRESS) {
@@ -397,6 +540,25 @@ namespace heracles {
 				k_bias_factor -= 0.01;
 				the_world_->set_k(k_bias_factor);
 			}
+		}
+
+		if (key == GLFW_KEY_UP) {
+			target_body->set_mass(target_body->get_mass() + 10);
+		}
+
+		if (key == GLFW_KEY_DOWN) {
+			if (target_body->get_mass() > 10)
+				target_body->set_mass(target_body->get_mass() - 10);
+		}
+
+		if (key == GLFW_KEY_LEFT) {
+			if(target_body->get_friction()>0.05)
+				target_body->set_friction(target_body->get_friction() - 0.05);
+		}
+
+		if (key == GLFW_KEY_RIGHT) {
+			if (target_body->get_friction() < 0.95)
+				target_body->set_friction(target_body->get_friction() + 0.05);
 		}
 
 		// 金字塔Demo

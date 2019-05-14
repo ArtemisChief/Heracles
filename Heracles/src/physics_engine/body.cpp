@@ -7,6 +7,8 @@ namespace heracles {
 	bool body::can_collide(const body& other) const { return !(mass_ == inf && other.mass_ == inf); }
 
 	void body::update_impulse(const vec2& impulse, const vec2& r) {
+		if (mass_ == inf)
+			return;
 		velocity_ += impulse * inv_mass_;
 		angular_velocity_ += inv_inertia_ * cross(r, impulse);
 	}
