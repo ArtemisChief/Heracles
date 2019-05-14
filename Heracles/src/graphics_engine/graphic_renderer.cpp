@@ -12,6 +12,7 @@ namespace heracles {
 	int type = 1;
 	bool show_info = true;
 	unsigned int point;
+	double g3_2 = sqrt(3) / 2;
 
 	// 窗口
 	GLFWwindow* graphic_renderer::window_ = nullptr;
@@ -252,6 +253,24 @@ namespace heracles {
 			the_world_->unlock();
 			break;
 		}
+
+		// 鼠标中键删除刚体
+		case GLFW_MOUSE_BUTTON_MIDDLE: {
+			glfwGetCursorPos(window, &x0, &y0);
+			const auto half_width = win_width_ / 2.0f;
+			const auto half_height = win_height_ / 2.0f;
+
+			x0 = (x0 - half_width) / half_width;
+			y0 = (-y0 + half_height) / half_height;
+
+			vec2 pos(x0, y0);
+			pos = projection_.inv() * pos + view_;
+
+			the_world_->lock();
+			rb = the_world_->check_point_in_poly(pos);
+			the_world_->unlock();
+			break;
+		}
 		default:;
 		}
 
@@ -313,6 +332,12 @@ namespace heracles {
 				force = projection_.inv() * force;
 
 				the_world_->add_impulse(rb, force);
+			}
+			break;
+		case GLFW_MOUSE_BUTTON_MIDDLE:
+			if (rb) {
+				//the_world_->del(rb);//不能直接删除
+				rb->set_world_position(vec2(inf, inf));
 			}
 			break;
 		default:
@@ -475,6 +500,134 @@ namespace heracles {
 			top->set_friction(0.95);
 			bind_vertex_array(top);
 			the_world_->add(top);
+
+			the_world_->unlock();
+		}
+
+		// 高尔顿钉板Demo
+		if (key == GLFW_KEY_F5 && action == GLFW_PRESS) {
+			the_world_->lock();
+			the_world_->clear();
+
+			auto left = the_world_->create_ground(0.3, 10, vec2(4, 0));
+			bind_vertex_array(left);
+			the_world_->add(left);
+
+			auto right = the_world_->create_ground(0.3, 10, vec2(-4, 0));
+			bind_vertex_array(right);
+			the_world_->add(right);
+
+			auto left_ = the_world_->create_ground(0.01, 7, vec2(2, 1));
+			bind_vertex_array(left_);
+			left_->set_rotation(pi / 6);
+			the_world_->add(left_);
+
+			auto right_ = the_world_->create_ground(0.01, 7, vec2(-2, 1));
+			bind_vertex_array(right_);
+			right_->set_rotation(-pi / 6);
+			the_world_->add(right_);
+
+			auto body = the_world_->create_ground(10, 0.3, vec2(0, -4));
+			bind_vertex_array(body);
+			the_world_->add(body);
+
+			body = the_world_->create_tri_ground(0.4, 0.4*g3_2, vec2(-0.4,3.6));
+			body->set_friction(0.2);
+			bind_vertex_array(body);
+			the_world_->add(body);
+
+			body = the_world_->create_tri_ground(0.4, 0.4*g3_2, vec2(0.4, 3.6));
+			body->set_friction(0.2);
+			bind_vertex_array(body);
+			the_world_->add(body);
+
+			vec2 x(-0.4f, 3.6f);
+			for (auto i = 1; i < 9; ++i) {
+				x -= vec2(0.4f, 0.8*g3_2);
+				auto y = x;
+				for (auto j = 0; j < i+2; ++j) {
+					if (i == 8)
+					{
+						body = the_world_->create_ground(0.1, 1.73, y - vec2(0.0f, 1.03f));
+						body->set_friction(0.2);
+						bind_vertex_array(body);
+						the_world_->add(body);
+					}
+
+					body = the_world_->create_tri_ground(0.4,0.4*g3_2, y);
+					body->set_friction(0.2);
+					bind_vertex_array(body);
+					the_world_->add(body);
+
+					y += vec2(0.8f, 0.0f);
+				}
+			}
+
+			body = the_world_->create_rectangle(10,0.3, 0.3, vec2(0, 4));
+			body->set_friction(0.2);
+			bind_vertex_array(body);
+			the_world_->add(body);
+
+			the_world_->unlock();
+		}
+
+		// 打砖块Demo（未完成）
+		if (key == GLFW_KEY_F6 && action == GLFW_PRESS) {
+			the_world_->lock();
+			the_world_->clear();
+
+			const auto ground = the_world_->create_ground(10, 0.3, vec2(0, -2.25));
+			ground->set_friction(0);
+			bind_vertex_array(ground);
+			the_world_->add(ground);
+
+			const auto left = the_world_->create_ground(0.3, 10, vec2(-4, 0));
+			left->set_friction(0);
+			bind_vertex_array(left);
+			the_world_->add(left);
+
+			const auto right = the_world_->create_ground(0.3, 10, vec2(4, 0));
+			right->set_friction(0);
+			bind_vertex_array(right);
+			the_world_->add(right);
+
+			const auto top = the_world_->create_ground(10, 0.3, vec2(0, 2.25));
+			top->set_friction(0);
+			bind_vertex_array(top);
+			the_world_->add(top);
+
+			/*const auto platform = the_world_->create_ground(0.5, 0.15, vec2(-2.8, -1.1));
+			ground->set_friction(0.2);
+			bind_vertex_array(platform);
+			the_world_->add(platform);
+
+			auto bird = the_world_->create_rectangle(10, 0.3, 0.3, vec2(-2.8, -0.8));
+			bird->set_friction(0.95);
+			bind_vertex_array(bird);
+			the_world_->add(bird);
+
+			for (auto i = 0; i < 4; ++i) {
+			auto box1 = the_world_->create_rectangle(5, 0.25, 0.8, vec2(2.8, -1.7 + 0.93 * i));
+			box1->set_friction(0.95);
+			bind_vertex_array(box1);
+			the_world_->add(box1);
+
+			auto box2 = the_world_->create_rectangle(5, 0.25, 0.8, vec2(3.5, -1.7 + 0.93 * i));
+			box2->set_friction(0.95);
+			bind_vertex_array(box2);
+			the_world_->add(box2);
+
+			auto box3 = the_world_->create_rectangle(5, 0.1, 1.0, vec2(3.15, -1.235 + 0.93 * i));
+			box3->set_friction(0.95);
+			box3->set_rotation(pi / 2);
+			bind_vertex_array(box3);
+			the_world_->add(box3);
+			}
+
+			auto top = the_world_->create_triangle(5, 1.0, 0.6, vec2(3.15, 2.0));
+			top->set_friction(0.95);
+			bind_vertex_array(top);
+			the_world_->add(top);*/
 
 			the_world_->unlock();
 		}

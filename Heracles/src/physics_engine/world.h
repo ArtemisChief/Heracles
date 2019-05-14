@@ -30,6 +30,8 @@ namespace heracles {
 		void add(const body::ptr body);
 		void add(const joint::ptr joint);
 
+		void del(const body::ptr body);
+
 		const vec2& get_g() const;
 
 		const body_list& get_bodies() const;
@@ -38,6 +40,9 @@ namespace heracles {
 
 		static rigid_body::ptr create_ground(const float width, const float height,
 											 const vec2& world_position);
+
+		static rigid_body::ptr create_tri_ground(const float base, const float height,
+			const vec2& world_position);
 
 		static rigid_body::ptr create_triangle(
 			const float mass, const float base, const float height,

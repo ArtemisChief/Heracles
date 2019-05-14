@@ -114,6 +114,18 @@ namespace heracles {
 
 	void world::add(const joint::ptr joint) { joints_.push_back(joint); }
 
+	void world::del(const body::ptr body) { 
+		std::vector<body::ptr>::iterator it;
+		for (it=bodies_.begin(); it != bodies_.end(); it++)
+		{
+			if (body == *it)
+			{
+				bodies_.erase(it);
+				break;
+			}
+		}
+	}
+
 	const world::body_list& world::get_bodies() const { return bodies_; }
 
 	const world::joint_list& world::get_joints() const { return joints_; }
@@ -128,6 +140,17 @@ namespace heracles {
 			vec2(-width / 2,  height / 2),
 			vec2(-width / 2, -height / 2),
 			vec2(width / 2, -height / 2)
+		};
+		auto body = std::make_shared<rigid_body>(inf, vertices);
+		body->set_world_position(world_position);
+		return body;
+	}
+
+	rigid_body::ptr world::create_tri_ground(const float base, const float height, const vec2& world_position) {
+		rigid_body::vertex_list vertices = {
+			vec2(0,  height / 2),
+			vec2(-base / 2, -height / 2),
+			vec2(base / 2, -height / 2)
 		};
 		auto body = std::make_shared<rigid_body>(inf, vertices);
 		body->set_world_position(world_position);
