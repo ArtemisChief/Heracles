@@ -15,7 +15,7 @@ namespace heracles {
 		using joint_list = std::vector<joint::ptr>;
 		using arbiter_list = std::unordered_map<uint32_t, arbiter::ptr>;
 
-		world(const vec2& g);
+		world(const vec2& g, const float &k_bias_factor);
 		~world() = default;
 
 		void clear();
@@ -33,6 +33,8 @@ namespace heracles {
 		void del(const body::ptr body);
 
 		const vec2& get_g() const;
+		void set_g(const vec2 &g);
+		void set_k(const float &k);
 
 		const body_list& get_bodies() const;
 		const joint_list& get_joints() const;

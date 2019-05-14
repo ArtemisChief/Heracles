@@ -37,7 +37,6 @@ namespace heracles {
 
 	void arbiter::pre_step(const float dt) {
 		static const float k_allowed_penetration = 0.0001;
-		static const float k_bias_factor = 0.2; // 弹性碰撞系数，1.0为完全弹性碰撞
 		const auto tangent = normal_.normal();
 		const auto a = a_.lock();
 		const auto b = b_.lock();
@@ -51,7 +50,7 @@ namespace heracles {
 
 			contact.mass_normal = 1 / kn;
 			contact.mass_tangent = 1 / kt;
-			contact.bias = -k_bias_factor / dt * std::min(0.0f, contact.separation + k_allowed_penetration);
+			contact.bias = -k_bias_factor_ / dt * std::min(0.0f, contact.separation + k_allowed_penetration);
 		}
 	}
 
@@ -97,6 +96,13 @@ namespace heracles {
 			}
 		}
 	}
+
+	float arbiter::k_bias_factor_ = 0;
+
+	void arbiter::set_k_bias_factor(const float &k) {
+		k_bias_factor_ = k;
+	}
+
 
 	void arbiter::add_contact(const contact &contact) {
 		contacts_.push_back(contact);

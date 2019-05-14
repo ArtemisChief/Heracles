@@ -3,7 +3,9 @@
 
 namespace heracles {
 
-	world::world(const vec2& g) :g_(g) {}
+	world::world(const vec2& g, const float &k_bias_factor) :g_(g) {
+		arbiter::set_k_bias_factor(k_bias_factor);
+	}
 
 	void world::clear() {
 		arbiters_.clear();
@@ -133,6 +135,14 @@ namespace heracles {
 	const world::arbiter_list &world::get_arbiters() const { return arbiters_; }
 
 	const vec2& world::get_g() const { return g_; }
+
+	void world::set_g(const vec2& g) {
+		g_ = g;
+	}
+
+	void world::set_k(const float& k) {
+		arbiter::set_k_bias_factor(k);
+	}
 
 	rigid_body::ptr world::create_ground(const float width, const float height, const vec2& world_position) {
 		rigid_body::vertex_list vertices = {

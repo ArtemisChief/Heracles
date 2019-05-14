@@ -41,9 +41,6 @@
     <ClCompile Include="src\util\math.cpp">
       <Filter>源文件\util</Filter>
     </ClCompile>
-    <ClCompile Include="src\util\stb_image.cpp">
-      <Filter>源文件\util</Filter>
-    </ClCompile>
     <ClCompile Include="src\physics_engine\body.cpp">
       <Filter>源文件\physics_engine</Filter>
     </ClCompile>
@@ -74,9 +71,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\util\math.h">
-      <Filter>头文件\util</Filter>
-    </ClInclude>
-    <ClInclude Include="src\util\stb_image.h">
       <Filter>头文件\util</Filter>
     </ClInclude>
     <ClInclude Include="src\physics_engine\body.h">

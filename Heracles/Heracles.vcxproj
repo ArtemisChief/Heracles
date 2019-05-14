@@ -153,7 +153,6 @@
     <ClCompile Include="src\physics_engine\world.cpp" />
     <ClCompile Include="src\util\glad.c" />
     <ClCompile Include="src\util\math.cpp" />
-    <ClCompile Include="src\util\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\graphics_engine\graphic_renderer.h" />
@@ -166,7 +165,6 @@
     <ClInclude Include="src\physics_engine\joint.h" />
     <ClInclude Include="src\physics_engine\world.h" />
     <ClInclude Include="src\util\math.h" />
-    <ClInclude Include="src\util\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\graphics_engine\shader\graphic.f" />

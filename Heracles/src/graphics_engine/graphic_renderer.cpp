@@ -12,7 +12,8 @@ namespace heracles {
 	int type = 1;
 	bool show_info = true;
 	unsigned int point;
-	double g3_2 = sqrt(3) / 2;
+	float g = 9.8f;
+	float k_bias_factor = 0.2f;
 
 	// 窗口
 	GLFWwindow* graphic_renderer::window_ = nullptr;
@@ -139,13 +140,6 @@ namespace heracles {
 		auto vertices = body->get_vertices();
 		const auto size = sizeof(float) * vertices.size() * 2;
 
-		//float tex_coord[] = {
-		//	0.0f, 0.0f,
-		//	0.0f, 1.0f,
-		//	1.0f, 0.0f,
-		//	1.0f, 1.0f
-		//};
-
 		// 设置顶点数组，配置顶点数组对象（VAO）与顶点缓冲对象（VBO）
 		auto& vao = *body->get_id();
 		unsigned int vbo;
@@ -156,21 +150,10 @@ namespace heracles {
 		glBindVertexArray(vao);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(GL_ARRAY_BUFFER, size * 2, nullptr, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, size * 2, &vertices[0], GL_STATIC_DRAW);
 
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
 		glEnableVertexAttribArray(0);
-		//glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<void*>(size));
-		//glEnableVertexAttribArray(1);
-
-		glBufferSubData(GL_ARRAY_BUFFER, 0, size, &vertices[0]);
-		
-		// 加载纹理
-		//glBufferSubData(GL_ARRAY_BUFFER, size, size, tex_coord);
-		//resource_manager::load_texture("src/resources/container.jpg", "test1");
-		//glBindBuffer(GL_ARRAY_BUFFER, 0);
-		//glBindVertexArray(0);
-
 	}
 
 	// 渲染 - 所有 OpenGL 绘制放在这里进行
@@ -190,7 +173,23 @@ namespace heracles {
 		}
 		the_world_->unlock();
 
-		draw_text(true, "Heracles", (-win_width_+30.0f)/2.0f, (win_height_-100.0f)/2.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		draw_text(true, "Heracles", (-win_width_ + 30.0f) / 2.0f, (win_height_ - 100.0f) / 2.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+
+		std::string out = "Gravitational acceleration: ";
+		std::stringstream g_stringstream;
+		g_stringstream << g;
+		if (g < 0)
+			out += "minus";
+		out += g_stringstream.str().substr(0, 4);
+
+		draw_text(true, out, (-win_width_ + 30.0f) / 2.0f, (win_height_ - 1770.0f) / 2.0f, 0.4f, 1.0f, 1.0f, 1.0f);
+
+		out = "K Bias Factor: ";
+		g_stringstream.str("");
+		g_stringstream << k_bias_factor;
+		out += g_stringstream.str().substr(0, 4);
+
+		draw_text(true, out, (-win_width_ + 30.0f) / 2.0f, (win_height_ - 1720.0f) / 2.0f, 0.4f, 1.0f, 1.0f, 1.0f);
 
 		// glfw双缓冲+处理事件
 		glfwSwapBuffers(window_);
@@ -376,6 +375,30 @@ namespace heracles {
 			the_world_->unlock();
 		}
 
+		if (key == GLFW_KEY_EQUAL) {
+			g += 0.1;
+			the_world_->set_g(vec2(0, -g));
+		}
+
+		if (key == GLFW_KEY_MINUS) {
+			g -= 0.1;
+			the_world_->set_g(vec2(0, -g));
+		}
+
+		if (key == GLFW_KEY_RIGHT_BRACKET) {
+			if (k_bias_factor < 0.99) {
+				k_bias_factor += 0.01;
+				the_world_->set_k(k_bias_factor);
+			}
+		}
+
+		if (key == GLFW_KEY_LEFT_BRACKET) {
+			if (k_bias_factor > 0.01) {
+				k_bias_factor -= 0.01;
+				the_world_->set_k(k_bias_factor);
+			}
+		}
+
 		// 金字塔Demo
 		if (key == GLFW_KEY_F1 && action == GLFW_PRESS) {
 			the_world_->lock();
@@ -509,53 +532,53 @@ namespace heracles {
 			the_world_->lock();
 			the_world_->clear();
 
-			auto left = the_world_->create_ground(0.3, 10, vec2(4, 0));
+			auto left = the_world_->create_ground(0.05, 8, vec2(-4.3, 0));
 			bind_vertex_array(left);
 			the_world_->add(left);
 
-			auto right = the_world_->create_ground(0.3, 10, vec2(-4, 0));
+			auto right = the_world_->create_ground(0.05, 8, vec2(4.3, 0));
 			bind_vertex_array(right);
 			the_world_->add(right);
 
-			auto left_ = the_world_->create_ground(0.01, 7, vec2(2, 1));
-			bind_vertex_array(left_);
-			left_->set_rotation(pi / 6);
-			the_world_->add(left_);
+			auto left_bevel = the_world_->create_ground(0.05, 1.03, vec2(-1.1, 3.55));
+			bind_vertex_array(left_bevel);
+			left_bevel->set_rotation(pi / 6);
+			left_bevel->set_friction(1.0);
+			the_world_->add(left_bevel);
 
-			auto right_ = the_world_->create_ground(0.01, 7, vec2(-2, 1));
-			bind_vertex_array(right_);
-			right_->set_rotation(-pi / 6);
-			the_world_->add(right_);
+			auto right_bevel = the_world_->create_ground(0.05, 1.03, vec2(1.1, 3.55));
+			bind_vertex_array(right_bevel);
+			right_bevel->set_rotation(-pi / 6);
+			right_bevel->set_friction(1.0);
+			the_world_->add(right_bevel);
 
-			auto body = the_world_->create_ground(10, 0.3, vec2(0, -4));
-			bind_vertex_array(body);
-			the_world_->add(body);
+			auto left_top = the_world_->create_ground(2.93, 0.05, vec2(-2.85, 4));
+			bind_vertex_array(left_top);
+			the_world_->add(left_top);
 
-			body = the_world_->create_tri_ground(0.4, 0.4*g3_2, vec2(-0.4,3.6));
-			body->set_friction(0.2);
-			bind_vertex_array(body);
-			the_world_->add(body);
+			auto right_top = the_world_->create_ground(2.93, 0.05, vec2(2.85, 4));
+			bind_vertex_array(right_top);
+			the_world_->add(right_top);
 
-			body = the_world_->create_tri_ground(0.4, 0.4*g3_2, vec2(0.4, 3.6));
-			body->set_friction(0.2);
+			auto body = the_world_->create_ground(8.6, 0.05, vec2(0, -4));
 			bind_vertex_array(body);
 			the_world_->add(body);
 
 			vec2 x(-0.4f, 3.6f);
 			for (auto i = 1; i < 9; ++i) {
-				x -= vec2(0.4f, 0.8*g3_2);
+				x -= vec2(0.4f, 0.8*sqrt(3) / 2);
 				auto y = x;
 				for (auto j = 0; j < i+2; ++j) {
 					if (i == 8)
 					{
-						body = the_world_->create_ground(0.1, 1.73, y - vec2(0.0f, 1.03f));
-						body->set_friction(0.2);
+						body = the_world_->create_ground(0.1, 1.88, y - vec2(0.0, 1.08));
+						body->set_friction(1.0);
 						bind_vertex_array(body);
 						the_world_->add(body);
 					}
 
-					body = the_world_->create_tri_ground(0.4,0.4*g3_2, y);
-					body->set_friction(0.2);
+					body = the_world_->create_tri_ground(0.32,0.32*sqrt(3) / 2, y);
+					body->set_friction(1.0);
 					bind_vertex_array(body);
 					the_world_->add(body);
 
@@ -563,71 +586,36 @@ namespace heracles {
 				}
 			}
 
-			body = the_world_->create_rectangle(10,0.3, 0.3, vec2(0, 4));
-			body->set_friction(0.2);
-			bind_vertex_array(body);
-			the_world_->add(body);
+			srand(time(nullptr));
+			for(auto i=1;i<350;i++)
+			{
+				body = the_world_->create_rectangle(100, 0.1, 0.1, vec2(static_cast<float>(rand() % 15) / 10 - 0.75, 3 + 0.1*i));
+				body->set_friction(1.0);
+				bind_vertex_array(body);
+				the_world_->add(body);
+			}
 
 			the_world_->unlock();
 		}
 
-		// 打砖块Demo（未完成）
+		// 牛顿摆Demo
 		if (key == GLFW_KEY_F6 && action == GLFW_PRESS) {
 			the_world_->lock();
 			the_world_->clear();
 
 			const auto ground = the_world_->create_ground(10, 0.3, vec2(0, -2.25));
-			ground->set_friction(0);
 			bind_vertex_array(ground);
 			the_world_->add(ground);
 
-			const auto left = the_world_->create_ground(0.3, 10, vec2(-4, 0));
-			left->set_friction(0);
-			bind_vertex_array(left);
-			the_world_->add(left);
+			for (auto i = 0; i < 5; i++) {
+				auto box = the_world_->create_rectangle(1000, 0.5, 0.5, vec2(1-0.5*i, 0));
+				box->set_friction(1.0);
+				bind_vertex_array(box);
+				the_world_->add(box);
 
-			const auto right = the_world_->create_ground(0.3, 10, vec2(4, 0));
-			right->set_friction(0);
-			bind_vertex_array(right);
-			the_world_->add(right);
-
-			const auto top = the_world_->create_ground(10, 0.3, vec2(0, 2.25));
-			top->set_friction(0);
-			bind_vertex_array(top);
-			the_world_->add(top);
-
-			/*const auto platform = the_world_->create_ground(0.5, 0.15, vec2(-2.8, -1.1));
-			ground->set_friction(0.2);
-			bind_vertex_array(platform);
-			the_world_->add(platform);
-
-			auto bird = the_world_->create_rectangle(10, 0.3, 0.3, vec2(-2.8, -0.8));
-			bird->set_friction(0.95);
-			bind_vertex_array(bird);
-			the_world_->add(bird);
-
-			for (auto i = 0; i < 4; ++i) {
-			auto box1 = the_world_->create_rectangle(5, 0.25, 0.8, vec2(2.8, -1.7 + 0.93 * i));
-			box1->set_friction(0.95);
-			bind_vertex_array(box1);
-			the_world_->add(box1);
-
-			auto box2 = the_world_->create_rectangle(5, 0.25, 0.8, vec2(3.5, -1.7 + 0.93 * i));
-			box2->set_friction(0.95);
-			bind_vertex_array(box2);
-			the_world_->add(box2);
-
-			auto box3 = the_world_->create_rectangle(5, 0.1, 1.0, vec2(3.15, -1.235 + 0.93 * i));
-			box3->set_friction(0.95);
-			box3->set_rotation(pi / 2);
-			bind_vertex_array(box3);
-			the_world_->add(box3);
+				const auto joint = the_world_->create_revolute_joint(ground, box, vec2(1-0.5*i, 3));
+				the_world_->add(joint);
 			}
-
-			auto top = the_world_->create_triangle(5, 1.0, 0.6, vec2(3.15, 2.0));
-			top->set_friction(0.95);
-			bind_vertex_array(top);
-			the_world_->add(top);*/
 
 			the_world_->unlock();
 		}
@@ -731,7 +719,7 @@ namespace heracles {
 		glPointSize(5.0);
 
 		// 构造世界
-		the_world_ = new world({ 0.0f, -9.8f });
+		the_world_ = new world({ 0.0f, -g }, k_bias_factor);
 
 		return 0;
 	}

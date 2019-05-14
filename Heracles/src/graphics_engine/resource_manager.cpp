@@ -3,11 +3,9 @@
 #include <fstream>
 
 #include "resource_manager.h"
-#include "../util/stb_image.h"
 
 namespace heracles {
 
-	std::map<std::string, texture> resource_manager::textures_;
 	std::map<std::string, shader> resource_manager::shaders_;
 
 	shader resource_manager::load_shader(const GLchar *v_shader_file, const GLchar *f_shader_file, const std::string name) {
@@ -19,21 +17,9 @@ namespace heracles {
 		return shaders_[name];
 	}
 
-	texture resource_manager::load_texture(const GLchar *file, const std::string name) {
-		textures_[name] = load_texture_from_file(file);
-		return textures_[name];
-	}
-
-	texture resource_manager::get_texture(const std::string name) {
-		return textures_[name];
-	}
-
 	void resource_manager::clear() {
 		for (const auto iter : shaders_)
 			glDeleteProgram(iter.second.id);
-
-		for (auto iter : textures_)
-			glDeleteTextures(1, &iter.second.id);
 	}
 
 	shader resource_manager::load_shader_from_file(const GLchar *v_shader_file, const GLchar *f_shader_file) {
@@ -64,29 +50,5 @@ namespace heracles {
 		shader shader;
 		shader.compile(v_shader_code, f_shader_code);
 		return shader;
-	}
-
-	texture resource_manager::load_texture_from_file(const GLchar *file) {
-		// 创建纹理对象
-		texture texture;
-
-		int width, height, nr_channels;
-
-		// 读取图片时上下翻转
-		stbi_set_flip_vertically_on_load(true);
-
-		// 读取纹理图片
-		const auto data = stbi_load(file, &width, &height, &nr_channels, 0);
-
-		// 生成纹理
-		if (data)
-			texture.generate(width, height, data);
-		else
-			std::cout << "Failed to load texture" << std::endl;
-
-		// 释放图片数据
-		stbi_image_free(data);
-
-		return texture;
 	}
 }
