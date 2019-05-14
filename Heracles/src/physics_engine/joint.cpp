@@ -2,7 +2,12 @@
 
 namespace heracles {
 
-	joint::joint(const body::ptr a, const body::ptr b) : a_(a), b_(b) {}
+	joint::joint(const body::ptr a, const body::ptr b) : id_a_(0), id_b_(0), a_(a), b_(b) {
+	}
+
+	unsigned int* joint::get_id_a() { return &id_a_; }
+
+	unsigned int* joint::get_id_b() { return &id_b_; }
 
 	body::ptr joint::get_a() const {
 		return a_.lock();
@@ -64,5 +69,19 @@ namespace heracles {
 		const auto b = b_.lock();
 		return b->get_world_position() + (b->get_rotation() * local_anchor_b_ + b->get_centroid());
 	}
+	
+	const vec2 & revolute_joint::get_anchor() {
+		return anchor_;
+	}
+
+	const vec2& revolute_joint::get_local_anchor_a() {
+		return local_anchor_a_;
+	}
+
+	const vec2& revolute_joint::get_local_anchor_b() {
+		return local_anchor_b_;
+	}
+
+
 
 }

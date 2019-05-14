@@ -49,6 +49,9 @@ namespace heracles {
 		// 绘制刚体
 		static void draw_body(rigid_body& body);
 
+		// 绘制铰链
+		static void draw_joint(revolute_joint& joint);
+
 		// 绘制接触点
 		static void draw_contact(const arbiter::ptr& arbiter);
 
@@ -63,6 +66,9 @@ namespace heracles {
 
 		// 绑定刚体对象的顶点，新创建的刚体只需要调用一次该函数
 		static void bind_vertex_array(rigid_body::ptr body);
+
+		// 绑定铰链对象的顶点，新创建的铰链只需要调用一次该函数
+		static void bind_vertex_array(revolute_joint::ptr joint);
 
 		// 渲染
 		static void display();

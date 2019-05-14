@@ -94,7 +94,6 @@ namespace heracles {
 		set_shader("graphic", "rotation", body.get_rotation());
 		set_shader("graphic", "anchor", body.get_centroid());
 
-		//resource_manager::get_texture("test1").bind();
 		glBindVertexArray(*body.get_id());
 
 		set_shader("graphic", "color", 0.41f, 0.41f, 0.41f);
@@ -110,6 +109,28 @@ namespace heracles {
 			glDrawArrays(GL_LINE_LOOP, 0, body.count());
 		}
 	}
+
+	void graphic_renderer::draw_joint(revolute_joint& joint)
+	{
+		if (joint.get_a()->get_mass() != inf) {
+			glBindVertexArray(*joint.get_id_a());
+			set_shader("graphic", "translation", joint.get_a()->get_world_position());
+			set_shader("graphic", "rotation", joint.get_a()->get_rotation());
+			set_shader("graphic", "anchor", vec2(0, 0));
+			set_shader("graphic", "color", 0.35f, 0.49f, 0.56f);
+			glDrawArrays(GL_LINE_STRIP, 0, 2);
+		}
+
+		if (joint.get_b()->get_mass() != inf) {
+			glBindVertexArray(*joint.get_id_b());
+			set_shader("graphic", "translation", joint.get_b()->get_world_position());
+			set_shader("graphic", "rotation", joint.get_b()->get_rotation());
+			set_shader("graphic", "anchor", vec2(0, 0));
+			set_shader("graphic", "color", 0.35f, 0.49f, 0.56f);
+			glDrawArrays(GL_LINE_STRIP, 0, 2);
+		}
+	}
+
 
 	// 绘制接触点
 	void graphic_renderer::draw_contact(const arbiter::ptr& arbiter) {
@@ -270,6 +291,50 @@ namespace heracles {
 		glEnableVertexAttribArray(0);
 	}
 
+	// 绑定铰链
+	void graphic_renderer::bind_vertex_array(revolute_joint::ptr joint) {
+		const auto centroid_a = joint->get_a()->get_centroid();
+		const auto anchor_a = joint->get_local_anchor_a();
+
+		std::vector<vec2> vertices1 = { centroid_a, anchor_a };
+		const auto size = sizeof(float) * vertices1.size() * 2;
+
+		// 设置顶点数组，配置顶点数组对象（VAO）与顶点缓冲对象（VBO）
+		auto& vao1 = *joint->get_id_a();
+		unsigned int vbo1;
+		glGenVertexArrays(1, &vao1);
+		glGenBuffers(1, &vbo1);
+
+		// 处理顶点
+		glBindVertexArray(vao1);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo1);
+		glBufferData(GL_ARRAY_BUFFER, size * 2, &vertices1[0], GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
+		glEnableVertexAttribArray(0);
+
+		const auto centroid_b = joint->get_b()->get_centroid();
+		const auto anchor_b = joint->get_local_anchor_b();
+
+		std::vector<vec2> vertices2 = { centroid_b, anchor_b };
+
+		// 设置顶点数组，配置顶点数组对象（VAO）与顶点缓冲对象（VBO）
+		auto& vao2 = *joint->get_id_b();
+		unsigned int vbo2;
+		glGenVertexArrays(1, &vao2);
+		glGenBuffers(1, &vbo2);
+
+		// 处理顶点
+		glBindVertexArray(vao2);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo2);
+		glBufferData(GL_ARRAY_BUFFER, size * 2, &vertices2[0], GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
+		glEnableVertexAttribArray(0);
+	}
+
 	// 渲染 - 所有 OpenGL 绘制放在这里进行
 	void graphic_renderer::display() {
 		glClearColor(0.117f, 0.117f, 0.117f, 1.0f);
@@ -278,6 +343,10 @@ namespace heracles {
 		the_world_->lock();
 		for (auto &body : the_world_->get_bodies()) {
 			draw_body(*std::dynamic_pointer_cast<rigid_body>(body));
+		}
+
+		for (auto &joint : the_world_->get_joints()) {
+			draw_joint(*std::dynamic_pointer_cast<revolute_joint>(joint));
 		}
 
 		if (show_info) {
@@ -570,17 +639,17 @@ namespace heracles {
 			bind_vertex_array(body);
 			the_world_->add(body);
 
-			vec2 x(-2.5f, -1.0f);
-			for (auto i = 0; i < 9; ++i) {
+			vec2 x(-2.3125f, -1.94f);
+			for (auto i = 0; i < 15; ++i) {
 				auto y = x;
-				for (auto j = i; j < 9; ++j) {
-					body = the_world_->create_rectangle(10, 0.4, 0.4, y);
+				for (auto j = i; j < 15; ++j) {
+					body = the_world_->create_rectangle(10, 0.3, 0.3, y);
 					body->set_friction(0.2);
 					bind_vertex_array(body);
 					the_world_->add(body);
-					y += vec2(0.6f, 0.0f);
+					y += vec2(0.33f, 0.0f);
 				}
-				x += vec2(0.3f, 0.6f);
+				x += vec2(0.1575f, 0.31f);
 			}
 
 			the_world_->unlock();
@@ -605,7 +674,9 @@ namespace heracles {
 				box->set_friction(0.4);
 				bind_vertex_array(box);
 				the_world_->add(box);
+
 				const auto joint = the_world_->create_revolute_joint(last, box, vec2(0.35 * i, y));
+				bind_vertex_array(joint);
 				the_world_->add(joint);
 				last = box;
 			}
@@ -769,13 +840,14 @@ namespace heracles {
 			bind_vertex_array(ground);
 			the_world_->add(ground);
 
-			for (auto i = 0; i < 5; i++) {
-				auto box = the_world_->create_rectangle(1000, 0.5, 0.5, vec2(1-0.5*i, 0));
+			for (auto i = 0; i < 8; i++) {
+				auto box = the_world_->create_rectangle(1000, 0.5, 0.5, vec2(1.5-0.5*i, -1));
 				box->set_friction(1.0);
 				bind_vertex_array(box);
 				the_world_->add(box);
 
-				const auto joint = the_world_->create_revolute_joint(ground, box, vec2(1-0.5*i, 3));
+				const auto joint = the_world_->create_revolute_joint(ground, box, vec2(1.5-0.5*i, 2));
+				bind_vertex_array(joint);
 				the_world_->add(joint);
 			}
 
