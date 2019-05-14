@@ -414,7 +414,7 @@ namespace heracles {
 			the_world_->add(ground);
 
 			const auto platform = the_world_->create_ground(1, 0.15, vec2(-3.5, 0));
-			ground->set_friction(0.2);
+			platform->set_friction(0.2);
 			bind_vertex_array(platform);
 			the_world_->add(platform);
 
@@ -444,7 +444,7 @@ namespace heracles {
 			the_world_->add(ground);
 
 			const auto platform = the_world_->create_ground(0.5, 0.15, vec2(-2.8, -1.1));
-			ground->set_friction(0.2);
+			platform->set_friction(0.2);
 			bind_vertex_array(platform);
 			the_world_->add(platform);
 
