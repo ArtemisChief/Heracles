@@ -19,7 +19,6 @@ namespace heracles {
 			auto y = x;
 			for (auto j = i; j < 15; ++j) {
 				body = world::create_rectangle(10, 0.3, 0.3, y);
-				body->set_friction(0.2);
 				graphic_renderer::bind_vertex_array(body);
 				world::add(body);
 				y += vec2(0.33f, 0.0f);
@@ -127,7 +126,7 @@ namespace heracles {
 			world::add(box3);
 		}
 
-		auto top = world::create_triangle(5, 1.0, 0.6, vec2(3.15, 2.0));
+		auto top = world::create_triangle(5, 1.0, 0.6, vec2(3.15, 1.95));
 		top->set_friction(0.95);
 		graphic_renderer::bind_vertex_array(top);
 		world::add(top);
