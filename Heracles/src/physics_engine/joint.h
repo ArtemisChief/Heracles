@@ -46,9 +46,8 @@ namespace heracles {
 		vec2 world_anchor_a() const;
 		vec2 world_anchor_b() const;
 
-		const vec2& get_anchor();
-		const vec2& get_local_anchor_a();
-		const vec2& get_local_anchor_b();
+		const vec2& get_local_anchor_a() const;
+		const vec2& get_local_anchor_b() const;
 
 	protected:
 		DISALLOW_COPY_AND_ASSIGN(revolute_joint)

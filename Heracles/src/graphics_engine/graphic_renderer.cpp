@@ -125,8 +125,6 @@ namespace heracles {
 			glBindVertexArray(*joint.get_id_b());
 			set_shader("graphic", "translation", joint.get_b()->get_world_position());
 			set_shader("graphic", "rotation", joint.get_b()->get_rotation());
-			set_shader("graphic", "anchor", vec2(0, 0));
-			set_shader("graphic", "color", 0.35f, 0.49f, 0.56f);
 			glDrawArrays(GL_LINE_STRIP, 0, 2);
 		}
 	}
@@ -154,7 +152,7 @@ namespace heracles {
 
 			switch (type) {
 			case 1:
-				draw_text(true, "Function: Set Position of Selected Body", (-win_width_ + 30.0f) / 2.0f, (win_height_ - 150.0f) / 2.0f, 0.4f, 1.0f, 1.0f, 1.0f);
+				draw_text(true, "Function: Drag Body", (-win_width_ + 30.0f) / 2.0f, (win_height_ - 150.0f) / 2.0f, 0.4f, 1.0f, 1.0f, 1.0f);
 				break;
 			case 2:
 				draw_text(true, "Function: Place Triangle", (-win_width_ + 30.0f) / 2.0f, (win_height_ - 150.0f) / 2.0f, 0.4f, 1.0f, 1.0f, 1.0f);
@@ -188,7 +186,7 @@ namespace heracles {
 
 			draw_text(true, out, (-win_width_ + 30.0f) / 2.0f, (win_height_ - 1720.0f) / 2.0f, 0.4f, 1.0f, 1.0f, 1.0f);
 
-			draw_text(true, "Press F1 to F6 to load demo", (-win_width_ + 2744.0f) / 2.0f, (win_height_ - 70.0f) / 2.0f, 0.3f, 1.0f, 1.0f, 1.0f);
+			draw_text(true, "Press F1 to F6 to load demo and R to reset", (-win_width_ + 2508.0f) / 2.0f, (win_height_ - 70.0f) / 2.0f, 0.3f, 1.0f, 1.0f, 1.0f);
 			draw_text(true, "Press 1 to 5 to change function", (-win_width_ + 2682.0f) / 2.0f, (win_height_ - 110.0f) / 2.0f, 0.3f, 1.0f, 1.0f, 1.0f);
 			draw_text(true, "Press WASD to move and shift or ctrl to change speed", (-win_width_ + 2354.0f) / 2.0f, (win_height_ - 150.0f) / 2.0f, 0.3f, 1.0f, 1.0f, 1.0f);
 			draw_text(true, "Press Left Mouse Button to implement selected function", (-win_width_ + 2322.0f) / 2.0f, (win_height_ - 190.0f) / 2.0f, 0.3f, 1.0f, 1.0f, 1.0f);
@@ -356,8 +354,6 @@ namespace heracles {
 		}
 		the_world_->unlock();
 
-		get_body_info();
-
 		show_ui();
 
 		// glfw双缓冲+处理事件
@@ -388,49 +384,13 @@ namespace heracles {
 		set_shader("graphic", "view", view_);
 	}
 
-
-	// 获取鼠标指向的物体
-	void graphic_renderer::get_body_info() {
-		double x, y;
-		glfwGetCursorPos(window_, &x, &y);
-		const auto half_width = win_width_ / 2.0f;
-		const auto half_height = win_height_ / 2.0f;
-
-		x = (x - half_width) / half_width;
-		y = (-y + half_height) / half_height;
-
-		vec2 pos(x, y);
-		pos = projection_.inv() * pos + view_;
-
-		the_world_->lock();
-		curr_body = the_world_->check_point_in_poly(pos);
-		the_world_->unlock();
-	}
-
 	// 鼠标按键回调函数
 	double x0, y0;
 	rigid_body::ptr rb;
 	void graphic_renderer::mouse_callback(GLFWwindow* window, const int button, const int action, const int mods) {
 
-		if (type == 1 && target_body && button == GLFW_MOUSE_BUTTON_LEFT && action==GLFW_PRESS) {
-			double x, y;
-			glfwGetCursorPos(window_, &x, &y);
-			const auto half_width = win_width_ / 2.0f;
-			const auto half_height = win_height_ / 2.0f;
-
-			x = (x - half_width) / half_width;
-			y = (-y + half_height) / half_height;
-
-			vec2 pos(x, y);
-			pos = projection_.inv() * pos + view_;
-
-			target_body->set_world_position(pos);
-			target_body->set_velocity(vec2(0, 0));
-			target_body->set_angular_velocity(0);
-		}
-
 		if (action == GLFW_PRESS) switch (button) {
-		//鼠标左键放置刚体
+		// 鼠标左键放置刚体 | 鼠标左键设置位置
 		case GLFW_MOUSE_BUTTON_LEFT: {
 			if (type != 1) {
 				glfwGetCursorPos(window, &x0, &y0);
@@ -478,7 +438,9 @@ namespace heracles {
 			the_world_->unlock();
 			break;
 		}
-		default:;
+
+		default:
+			break;
 		}
 
 		if (action == GLFW_RELEASE) switch (button) {
@@ -529,6 +491,7 @@ namespace heracles {
 			}
 			break;
 		}
+
 		case GLFW_MOUSE_BUTTON_RIGHT:
 			if (rb) {
 				double x1, y1;
@@ -545,12 +508,14 @@ namespace heracles {
 				the_world_->add_impulse(rb, force);
 			}
 			break;
+
 		case GLFW_MOUSE_BUTTON_MIDDLE:
 			if (rb) {
 				//the_world_->del(rb);//不能直接删除
 				rb->set_world_position(vec2(inf, inf));
 			}
 			break;
+
 		default:
 			break;
 		}
@@ -572,66 +537,35 @@ namespace heracles {
 
 	// 键盘按键回调函数
 	void graphic_renderer::keyboard_callback(GLFWwindow* window, const int key, const int scancode, const int action, const int mods) {
-		if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+		if (action == GLFW_PRESS) switch (key) {
+		case GLFW_KEY_ESCAPE:
+			glfwSetWindowShouldClose(window_, true);
+			break;
+
+		case GLFW_KEY_SPACE:
 			is_paused = !is_paused;
+			break;
 
-		if (key == GLFW_KEY_TAB && action == GLFW_PRESS)
+		case GLFW_KEY_TAB:
 			show_info = !show_info;
+			break;
 
-		if ((key == GLFW_KEY_1 || key == GLFW_KEY_2 || key == GLFW_KEY_3 || key == GLFW_KEY_4 || key==GLFW_KEY_5) && action == GLFW_PRESS)
+		case GLFW_KEY_1:
+		case GLFW_KEY_2:
+		case GLFW_KEY_3:
+		case GLFW_KEY_4:
+		case GLFW_KEY_5:
 			type = key - 48;
+			break;
 
-		if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+		case GLFW_KEY_R:
 			the_world_->lock();
 			the_world_->clear();
 			the_world_->unlock();
-		}
+			break;
 
-		if (key == GLFW_KEY_EQUAL) {
-			g += 0.1;
-			the_world_->set_g(vec2(0, -g));
-		}
-
-		if (key == GLFW_KEY_MINUS) {
-			g -= 0.1;
-			the_world_->set_g(vec2(0, -g));
-		}
-
-		if (key == GLFW_KEY_RIGHT_BRACKET) {
-			if (k_bias_factor < 0.99) {
-				k_bias_factor += 0.01;
-				the_world_->set_k(k_bias_factor);
-			}
-		}
-
-		if (key == GLFW_KEY_LEFT_BRACKET) {
-			if (k_bias_factor > 0.01) {
-				k_bias_factor -= 0.01;
-				the_world_->set_k(k_bias_factor);
-			}
-		}
-
-		if (key == GLFW_KEY_UP) {
-			target_body->set_mass(target_body->get_mass() + 10);
-		}
-
-		if (key == GLFW_KEY_DOWN) {
-			if (target_body->get_mass() > 10)
-				target_body->set_mass(target_body->get_mass() - 10);
-		}
-
-		if (key == GLFW_KEY_LEFT) {
-			if(target_body->get_friction()>0.05)
-				target_body->set_friction(target_body->get_friction() - 0.05);
-		}
-
-		if (key == GLFW_KEY_RIGHT) {
-			if (target_body->get_friction() < 0.95)
-				target_body->set_friction(target_body->get_friction() + 0.05);
-		}
-
-		// 金字塔Demo
-		if (key == GLFW_KEY_F1 && action == GLFW_PRESS) {
+		// 抽方块Demo
+		case GLFW_KEY_F1: {
 			the_world_->lock();
 			the_world_->clear();
 
@@ -653,10 +587,11 @@ namespace heracles {
 			}
 
 			the_world_->unlock();
+			break;
 		}
 
-		//铰链Demo
-		if (key == GLFW_KEY_F2 && action == GLFW_PRESS) {
+		// 铰链Demo
+		case GLFW_KEY_F2: { 
 			the_world_->lock();
 			the_world_->clear();
 
@@ -682,10 +617,11 @@ namespace heracles {
 			}
 
 			the_world_->unlock();
+			break;
 		}
-
-		//多米诺Demo
-		if (key == GLFW_KEY_F3 && action == GLFW_PRESS) {
+			
+		// 多米诺Demo
+		case GLFW_KEY_F3: { 
 			the_world_->lock();
 			the_world_->clear();
 
@@ -705,17 +641,18 @@ namespace heracles {
 			the_world_->add(bullet);
 
 			for (auto i = 0; i < 20; ++i) {
-				auto box = the_world_->create_rectangle(20, 0.15, 2.5, vec2(-2.8 +  0.7 * i, -0.75));
+				auto box = the_world_->create_rectangle(20, 0.15, 2.5, vec2(-2.8 + 0.7 * i, -0.75));
 				box->set_friction(0.8);
 				bind_vertex_array(box);
 				the_world_->add(box);
 			}
 
 			the_world_->unlock();
+			break;
 		}
 
 		// 愤怒的小鸟Demo
-		if (key == GLFW_KEY_F4 && action == GLFW_PRESS) {
+		case GLFW_KEY_F4: { 
 			the_world_->lock();
 			the_world_->clear();
 
@@ -747,7 +684,7 @@ namespace heracles {
 
 				auto box3 = the_world_->create_rectangle(5, 0.1, 1.0, vec2(3.15, -1.235 + 0.93 * i));
 				box3->set_friction(0.95);
-				box3->set_rotation(pi/2);
+				box3->set_rotation(pi / 2);
 				bind_vertex_array(box3);
 				the_world_->add(box3);
 			}
@@ -758,18 +695,19 @@ namespace heracles {
 			the_world_->add(top);
 
 			the_world_->unlock();
+			break;
 		}
 
 		// 高尔顿钉板Demo
-		if (key == GLFW_KEY_F5 && action == GLFW_PRESS) {
+		case GLFW_KEY_F5: { 
 			the_world_->lock();
 			the_world_->clear();
 
-			auto left = the_world_->create_ground(0.05, 8, vec2(-4.3, 0));
+			const auto left = the_world_->create_ground(0.05, 8, vec2(-4.3, 0));
 			bind_vertex_array(left);
 			the_world_->add(left);
 
-			auto right = the_world_->create_ground(0.05, 8, vec2(4.3, 0));
+			const auto right = the_world_->create_ground(0.05, 8, vec2(4.3, 0));
 			bind_vertex_array(right);
 			the_world_->add(right);
 
@@ -785,11 +723,11 @@ namespace heracles {
 			right_bevel->set_friction(1.0);
 			the_world_->add(right_bevel);
 
-			auto left_top = the_world_->create_ground(2.93, 0.05, vec2(-2.85, 4));
+			const auto left_top = the_world_->create_ground(2.93, 0.05, vec2(-2.85, 4));
 			bind_vertex_array(left_top);
 			the_world_->add(left_top);
 
-			auto right_top = the_world_->create_ground(2.93, 0.05, vec2(2.85, 4));
+			const auto right_top = the_world_->create_ground(2.93, 0.05, vec2(2.85, 4));
 			bind_vertex_array(right_top);
 			the_world_->add(right_top);
 
@@ -801,16 +739,15 @@ namespace heracles {
 			for (auto i = 1; i < 9; ++i) {
 				x -= vec2(0.4f, 0.8*sqrt(3) / 2);
 				auto y = x;
-				for (auto j = 0; j < i+2; ++j) {
-					if (i == 8)
-					{
+				for (auto j = 0; j < i + 2; ++j) {
+					if (i == 8) {
 						body = the_world_->create_ground(0.1, 1.88, y - vec2(0.0, 1.08));
 						body->set_friction(1.0);
 						bind_vertex_array(body);
 						the_world_->add(body);
 					}
 
-					body = the_world_->create_tri_ground(0.32,0.32*sqrt(3) / 2, y);
+					body = the_world_->create_tri_ground(0.32, 0.32*sqrt(3) / 2, y);
 					body->set_friction(1.0);
 					bind_vertex_array(body);
 					the_world_->add(body);
@@ -820,8 +757,7 @@ namespace heracles {
 			}
 
 			srand(time(nullptr));
-			for(auto i=1;i<350;i++)
-			{
+			for (auto i = 1; i < 350; i++) {
 				body = the_world_->create_rectangle(100, 0.1, 0.1, vec2(static_cast<float>(rand() % 15) / 10 - 0.75, 3 + 0.1*i));
 				body->set_friction(1.0);
 				bind_vertex_array(body);
@@ -829,10 +765,11 @@ namespace heracles {
 			}
 
 			the_world_->unlock();
+			break;
 		}
 
 		// 牛顿摆Demo
-		if (key == GLFW_KEY_F6 && action == GLFW_PRESS) {
+		case GLFW_KEY_F6: { 
 			the_world_->lock();
 			the_world_->clear();
 
@@ -841,24 +778,113 @@ namespace heracles {
 			the_world_->add(ground);
 
 			for (auto i = 0; i < 8; i++) {
-				auto box = the_world_->create_rectangle(1000, 0.5, 0.5, vec2(1.5-0.5*i, -1));
+				auto box = the_world_->create_rectangle(1000, 0.5, 0.5, vec2(1.5 - 0.5*i, -1));
 				box->set_friction(1.0);
 				bind_vertex_array(box);
 				the_world_->add(box);
 
-				const auto joint = the_world_->create_revolute_joint(ground, box, vec2(1.5-0.5*i, 2));
+				const auto joint = the_world_->create_revolute_joint(ground, box, vec2(1.5 - 0.5*i, 2));
 				bind_vertex_array(joint);
 				the_world_->add(joint);
 			}
 
 			the_world_->unlock();
+			break;
+		}
+			
+		default:
+			break;
+		}
+
+		switch (key) {
+		case GLFW_KEY_EQUAL:
+			g += 0.1;
+			the_world_->set_g(vec2(0, -g));
+			break;
+
+		case GLFW_KEY_MINUS:
+			g -= 0.1;
+			the_world_->set_g(vec2(0, -g));
+			break;
+
+		case GLFW_KEY_RIGHT_BRACKET:
+			if (k_bias_factor <= 0.99) {
+				k_bias_factor += 0.01;
+				the_world_->set_k(k_bias_factor);
+				if (k_bias_factor >= 0.988 && k_bias_factor <= 1.1) {
+					k_bias_factor = 1.0;
+					the_world_->set_k(k_bias_factor);
+				}
+			}
+			break;
+
+		case GLFW_KEY_LEFT_BRACKET:
+			if (k_bias_factor > 0.21) {
+				k_bias_factor -= 0.01;
+				the_world_->set_k(k_bias_factor);
+			}
+			break;
+
+		case GLFW_KEY_UP:
+			target_body->set_mass(target_body->get_mass() + 5);
+			break;
+
+		case GLFW_KEY_DOWN:
+			if (target_body->get_mass() > 5)
+				target_body->set_mass(target_body->get_mass() - 5);
+			break;
+
+		case GLFW_KEY_LEFT:
+			if (target_body->get_friction() >= 0.051)
+				target_body->set_friction(target_body->get_friction() - 0.05);
+			if (target_body->get_friction() > 0.049 && target_body->get_friction() < 0.051)
+				target_body->set_friction(0.0);
+			break;
+
+		case GLFW_KEY_RIGHT:
+			if (target_body->get_friction() < 0.95)
+				target_body->set_friction(target_body->get_friction() + 0.05);
+			break;
+
+		default:
+			break;
 		}
 	}
 
-	// 处理输入
+	// 鼠标坐标回调函数
+	void graphic_renderer::cursor_callback(GLFWwindow* window, double x, double y) {
+		const auto half_width = win_width_ / 2.0f;
+		const auto half_height = win_height_ / 2.0f;
+
+		x = (x - half_width) / half_width;
+		y = (-y + half_height) / half_height;
+
+		vec2 pos(x, y);
+		pos = projection_.inv() * pos + view_;
+
+		the_world_->lock();
+		curr_body = the_world_->check_point_in_poly(pos);
+		the_world_->unlock();
+	}
+
+	// 处理高速输入
 	void graphic_renderer::process_input() {
-		if (glfwGetKey(window_, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-			glfwSetWindowShouldClose(window_, true);
+		if (type == 1 && target_body && glfwGetMouseButton(window_, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+			double x, y;
+			glfwGetCursorPos(window_, &x, &y);
+			const auto half_width = win_width_ / 2.0f;
+			const auto half_height = win_height_ / 2.0f;
+
+			x = (x - half_width) / half_width;
+			y = (-y + half_height) / half_height;
+
+			vec2 pos(x, y);
+			pos = projection_.inv() * pos + view_;
+
+			target_body->set_world_position(pos);
+			target_body->set_velocity(vec2(0, 0));
+			target_body->set_angular_velocity(0);
+		}
 
 		auto camera_speed = 0.02f;
 		if (glfwGetKey(window_, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
@@ -909,6 +935,7 @@ namespace heracles {
 		glfwSetMouseButtonCallback(window_, mouse_callback);
 		glfwSetScrollCallback(window_, scroll_callback);
 		glfwSetKeyCallback(window_, keyboard_callback);
+		glfwSetCursorPosCallback(window_, cursor_callback);
 
 		// glad加载OpenGL函数指针
 		if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {

@@ -69,16 +69,12 @@ namespace heracles {
 		const auto b = b_.lock();
 		return b->get_world_position() + (b->get_rotation() * local_anchor_b_ + b->get_centroid());
 	}
-	
-	const vec2 & revolute_joint::get_anchor() {
-		return anchor_;
-	}
 
-	const vec2& revolute_joint::get_local_anchor_a() {
+	const vec2& revolute_joint::get_local_anchor_a() const {
 		return local_anchor_a_;
 	}
 
-	const vec2& revolute_joint::get_local_anchor_b() {
+	const vec2& revolute_joint::get_local_anchor_b() const {
 		return local_anchor_b_;
 	}
 

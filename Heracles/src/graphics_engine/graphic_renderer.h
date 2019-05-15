@@ -76,9 +76,6 @@ namespace heracles {
 		// 物理引擎部分
 		static void heracles_run();
 
-		// 获取鼠标指向的物体
-		static void get_body_info();
-
 		// 摄像机移动
 		static void move_camera(const vec2 translation);
 
@@ -91,7 +88,10 @@ namespace heracles {
 		// 键盘按键回调函数
 		static void keyboard_callback(GLFWwindow* window, const int key, const int scancode, const int action, const int mods);
 
-		// 处理输入
+		// 鼠标坐标回调函数
+		static void cursor_callback(GLFWwindow* window, double x, double y);
+
+		// 处理高速输入
 		static void process_input();
 
 		// 窗口大小调整时对视口（Viewport）进行调整的回调函数
