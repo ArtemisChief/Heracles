@@ -125,6 +125,8 @@ namespace heracles {
 			glBindVertexArray(*joint.get_id_b());
 			set_shader("graphic", "translation", joint.get_b()->get_world_position());
 			set_shader("graphic", "rotation", joint.get_b()->get_rotation());
+			set_shader("graphic", "anchor", vec2(0, 0));
+			set_shader("graphic", "color", 0.35f, 0.49f, 0.56f);
 			glDrawArrays(GL_LINE_STRIP, 0, 2);
 		}
 	}
