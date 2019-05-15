@@ -16,15 +16,15 @@ namespace heracles {
 		// 窗口
 		static GLFWwindow* window_;
 
+		// 点的顶点数组对象
+		static unsigned int point_vao_;
+
 		// 着色器程序
 		static shader shader_program_;
 
 		// 窗口大小初始设置
 		static GLint win_width_;
 		static GLint win_height_;
-
-		// 世界
-		static world* the_world_;
 
 		// 视点向量与投影矩阵
 		static GLfloat zoom_;
@@ -35,6 +35,8 @@ namespace heracles {
 		static text* text_;
 
 	public:
+
+		friend class user_interface;
 
 		// 切换/设置着色器
 		static void set_shader(const char* shader_name, const char* name, const vec2 v);
@@ -55,9 +57,6 @@ namespace heracles {
 		// 绘制接触点
 		static void draw_contact(const arbiter::ptr& arbiter);
 
-		// 显示UI
-		static void show_ui();
-
 		// 标题栏显示dt
 		static void update_title(const float dt);
 
@@ -73,26 +72,11 @@ namespace heracles {
 		// 渲染
 		static void display();
 
-		// 物理引擎部分
+		// 物理引擎线程
 		static void heracles_run();
 
 		// 摄像机移动
 		static void move_camera(const vec2 translation);
-
-		// 鼠标按键回调函数
-		static void mouse_callback(GLFWwindow* window, const int button, const int action, const int mods);
-
-		// 鼠标滚轮回调函数
-		static void scroll_callback(GLFWwindow* window, const double xoffset, const double yoffset);
-
-		// 键盘按键回调函数
-		static void keyboard_callback(GLFWwindow* window, const int key, const int scancode, const int action, const int mods);
-
-		// 鼠标坐标回调函数
-		static void cursor_callback(GLFWwindow* window, double x, double y);
-
-		// 处理高速输入
-		static void process_input();
 
 		// 窗口大小调整时对视口（Viewport）进行调整的回调函数
 		static void framebuffer_size_callback(GLFWwindow* window, const int width, const int height);

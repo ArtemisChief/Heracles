@@ -142,10 +142,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\graphics_engine\graphic_renderer.cpp" />
+    <ClCompile Include="src\graphics_engine\level_manager.cpp" />
     <ClCompile Include="src\graphics_engine\resource_manager.cpp" />
     <ClCompile Include="src\graphics_engine\shader.cpp" />
     <ClCompile Include="src\graphics_engine\texture.cpp" />
     <ClCompile Include="src\graphics_engine\text.cpp" />
+    <ClCompile Include="src\graphics_engine\user_interface.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\physics_engine\body.cpp" />
     <ClCompile Include="src\physics_engine\collision.cpp" />
@@ -156,10 +158,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\graphics_engine\graphic_renderer.h" />
+    <ClInclude Include="src\graphics_engine\level_manager.h" />
     <ClInclude Include="src\graphics_engine\resource_manager.h" />
     <ClInclude Include="src\graphics_engine\shader.h" />
     <ClInclude Include="src\graphics_engine\texture.h" />
     <ClInclude Include="src\graphics_engine\text.h" />
+    <ClInclude Include="src\graphics_engine\user_interface.h" />
     <ClInclude Include="src\physics_engine\body.h" />
     <ClInclude Include="src\physics_engine\collision.h" />
     <ClInclude Include="src\physics_engine\joint.h" />

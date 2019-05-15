@@ -3,15 +3,12 @@
 #include <string>
 #include <map>
 #include "shader.h"
-#include "texture.h"
 
 namespace heracles {
 
 	class resource_manager {
 
 	public:
-
-		static std::map<std::string, shader> shaders_;
 
 		static shader load_shader(const GLchar *v_shader_file, const GLchar *f_shader_file, const std::string name);
 
@@ -21,7 +18,7 @@ namespace heracles {
 
 	private:
 
-		resource_manager() {}
+		static std::map<std::string, shader> shaders_;
 
 		static shader load_shader_from_file(const GLchar *v_shader_file, const GLchar *f_shader_file);
 	};

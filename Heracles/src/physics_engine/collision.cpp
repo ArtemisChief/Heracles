@@ -50,7 +50,7 @@ namespace heracles {
 
 			contact.mass_normal = 1 / kn;
 			contact.mass_tangent = 1 / kt;
-			contact.bias = -k_bias_factor_ / dt * std::min(0.0f, contact.separation + k_allowed_penetration);
+			contact.bias = -k_bias_factor / dt * std::min(0.0f, contact.separation + k_allowed_penetration);
 		}
 	}
 
@@ -97,16 +97,9 @@ namespace heracles {
 		}
 	}
 
-	float arbiter::k_bias_factor_;
+	float arbiter::k_bias_factor;
 
-	void arbiter::set_k_bias_factor(const float &k) {
-		k_bias_factor_ = k;
-	}
-
-
-	void arbiter::add_contact(const contact &contact) {
-		contacts_.push_back(contact);
-	}
+	void arbiter::add_contact(const contact &contact) { contacts_.push_back(contact); }
 
 	// 找出最小间隙
 	static size_t incident_edge(const vec2 &n, const rigid_body &body) {

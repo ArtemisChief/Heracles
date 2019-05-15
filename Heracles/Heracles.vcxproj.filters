@@ -68,6 +68,12 @@
     <ClCompile Include="src\graphics_engine\graphic_renderer.cpp">
       <Filter>源文件\graphics_engine</Filter>
     </ClCompile>
+    <ClCompile Include="src\graphics_engine\user_interface.cpp">
+      <Filter>源文件\graphics_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics_engine\level_manager.cpp">
+      <Filter>源文件\graphics_engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\util\math.h">
@@ -98,6 +104,12 @@
       <Filter>头文件\graphics_engine</Filter>
     </ClInclude>
     <ClInclude Include="src\graphics_engine\graphic_renderer.h">
+      <Filter>头文件\graphics_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics_engine\user_interface.h">
+      <Filter>头文件\graphics_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics_engine\level_manager.h">
       <Filter>头文件\graphics_engine</Filter>
     </ClInclude>
   </ItemGroup>

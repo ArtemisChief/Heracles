@@ -43,13 +43,12 @@ namespace heracles {
 
 		static ptr is_collide(rigid_body::ptr &pa, rigid_body::ptr &pb, uint32_t &id);
 
-		static void set_k_bias_factor(const float &k);
+		static float k_bias_factor; // 弹性碰撞系数，1.0为完全弹性碰撞
 
 	private:
 		std::weak_ptr<body> a_, b_; // 参与碰撞检测的两个刚体
 		vec2 normal_; // 法向量
 		contact_list contacts_; // 接触点列表
-		static float k_bias_factor_; // 弹性碰撞系数，1.0为完全弹性碰撞
 	};
 
 }
