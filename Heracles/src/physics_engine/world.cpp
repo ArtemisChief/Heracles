@@ -25,7 +25,7 @@ namespace heracles {
 	void world::step(const float dt) {
 		// Åö×²¼ì²â
 		for (size_t i = 0; i < bodies.size(); ++i) {
-			for (size_t j = i + 1; j < bodies.size(); ++j) {
+			for (auto j = i + 1; j < bodies.size(); ++j) {
 				auto a = std::dynamic_pointer_cast<rigid_body>(bodies[i]);
 				auto b = std::dynamic_pointer_cast<rigid_body>(bodies[j]);
 				if (!a->can_collide(*b)) {
