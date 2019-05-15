@@ -50,10 +50,10 @@ namespace heracles {
 
 			std::string out = "Gravitational Acceleration: ";
 			std::stringstream g_stringstream;
-			if (world::g.y < 0)
-				out += "minus";
+			if (world::g.y > 0)
+				out += "minus ";
 			g_stringstream << world::g.y;
-			out += g_stringstream.str().substr(0, 4);
+			out += g_stringstream.str();
 
 			graphic_renderer::draw_text(true, out, (-graphic_renderer::win_width_ + 30.0f) / 2.0f, (graphic_renderer::win_height_ - 1770.0f) / 2.0f, 0.4f, 1.0f, 1.0f, 1.0f);
 
@@ -375,23 +375,24 @@ namespace heracles {
 			break;
 
 		case GLFW_KEY_UP:
-			target_body->set_mass(target_body->get_mass() + 5);
+			if (target_body)
+				target_body->set_mass(target_body->get_mass() + 5);
 			break;
 
 		case GLFW_KEY_DOWN:
-			if (target_body->get_mass() > 5)
+			if (target_body && target_body->get_mass() > 5)
 				target_body->set_mass(target_body->get_mass() - 5);
 			break;
 
 		case GLFW_KEY_LEFT:
-			if (target_body->get_friction() >= 0.051)
+			if (target_body && target_body->get_friction() >= 0.051)
 				target_body->set_friction(target_body->get_friction() - 0.05);
-			if (target_body->get_friction() > 0.049 && target_body->get_friction() < 0.051)
+			if (target_body && target_body->get_friction() > 0.049 && target_body->get_friction() < 0.051)
 				target_body->set_friction(0.0);
 			break;
 
 		case GLFW_KEY_RIGHT:
-			if (target_body->get_friction() < 0.95)
+			if (target_body && target_body->get_friction() < 0.95)
 				target_body->set_friction(target_body->get_friction() + 0.05);
 			break;
 
