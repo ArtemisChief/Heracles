@@ -59,9 +59,6 @@
     <ClCompile Include="src\graphics_engine\shader.cpp">
       <Filter>源文件\graphics_engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphics_engine\texture.cpp">
-      <Filter>源文件\graphics_engine</Filter>
-    </ClCompile>
     <ClCompile Include="src\graphics_engine\text.cpp">
       <Filter>源文件\graphics_engine</Filter>
     </ClCompile>
@@ -97,9 +94,6 @@
     <ClInclude Include="src\graphics_engine\shader.h">
       <Filter>头文件\graphics_engine</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphics_engine\texture.h">
-      <Filter>头文件\graphics_engine</Filter>
-    </ClInclude>
     <ClInclude Include="src\graphics_engine\text.h">
       <Filter>头文件\graphics_engine</Filter>
     </ClInclude>
@@ -126,5 +120,6 @@
     <None Include="src\graphics_engine\shader\graphic.v">
       <Filter>shader</Filter>
     </None>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

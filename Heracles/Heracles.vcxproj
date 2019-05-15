@@ -145,7 +145,6 @@
     <ClCompile Include="src\graphics_engine\level_manager.cpp" />
     <ClCompile Include="src\graphics_engine\resource_manager.cpp" />
     <ClCompile Include="src\graphics_engine\shader.cpp" />
-    <ClCompile Include="src\graphics_engine\texture.cpp" />
     <ClCompile Include="src\graphics_engine\text.cpp" />
     <ClCompile Include="src\graphics_engine\user_interface.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -161,7 +160,6 @@
     <ClInclude Include="src\graphics_engine\level_manager.h" />
     <ClInclude Include="src\graphics_engine\resource_manager.h" />
     <ClInclude Include="src\graphics_engine\shader.h" />
-    <ClInclude Include="src\graphics_engine\texture.h" />
     <ClInclude Include="src\graphics_engine\text.h" />
     <ClInclude Include="src\graphics_engine\user_interface.h" />
     <ClInclude Include="src\physics_engine\body.h" />
@@ -171,6 +169,7 @@
     <ClInclude Include="src\util\math.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ClassDiagram.cd" />
     <None Include="src\graphics_engine\shader\graphic.f" />
     <None Include="src\graphics_engine\shader\graphic.v" />
     <None Include="src\graphics_engine\shader\text.f" />
