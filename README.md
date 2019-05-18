@@ -6,6 +6,8 @@ Simple Physics Engine for simulating motion of convex polygon with adjustable pa
 
 ![Logo](https://raw.githubusercontent.com/ArtemisiaChief/Heracles/master/img/Logo.jpg)
 
+Introduction in Chinese: [Click Here](https://lab-ch76.top/2019/05/heracles/)
+
 ## Demos
 
 You can press F1~F6 to load 6 different demos, for example:
