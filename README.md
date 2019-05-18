@@ -1,67 +1,49 @@
 # Heracles
 
-Simple 2D Physics Engine
+> a simple 2D Graphic Physics Engine based on OpenGL 3.3
 
-## Collaborators
+Simple Physics Engine for simulating motion of convex polygon with adjustable paraments, such as gravitational acceleration, elastic collision coefficient, mass, size and friction coefficient. Use it for simple 2D game making, for education, or just for fun.
 
-[callMeBigBen](https://github.com/callMeBigBen)
+## Demos
 
-[ctwDuyh](https://github.com/ctwDuyh) 
+You can press F1~F6 to load 6 different demos, for example:
 
-[MrZse](https://github.com/MrZse)
+A demo of pyramid (Demo1, with GUI), you can create another brick with large mass to strike it :)
 
-[we98](https://github.com/we98)
+![Demo1](https://raw.githubusercontent.com/ArtemisiaChief/Heracles/master/img/Demo1.jpg)
 
-[yyzih](https://github.com/yyzih)
+And a demo of simplified version of *Angry Birds* (Demo4, without GUI)
 
-(Arranged in alphabetical order)
+![Demo4](https://raw.githubusercontent.com/ArtemisiaChief/Heracles/master/img/Demo4.jpg)
 
-## Reference
+## Functions
 
-1. Some Materials:
-   
-    https://www.cnblogs.com/bajdcc/p/5925922.html
+* Create customized rigid body with different type, size and mass
+* Drag or apply impulse on selected body
+* Set world paraments such as such as gravitational acceleration and elastic collision coefficient
+* Modify the attribute of selected body, such as mass and friction coefficient
+* Toggle GUI, which will toggle showing text and collision contact point
+* Set the world to pause or resume
 
-    https://www.cnblogs.com/iamzhanglei/p/5104699.html
+## Usage
 
-    https://www.cnblogs.com/iamzhanglei/p/5108747.html
+* You can see it at its top-right corner
 
-2. Open Source 2D Physics Engine:
+## Install
 
-    https://github.com/wgtdkp/apollonia
+The Heracles project builds and tests only on Microsoft Windows 10
 
-    https://github.com/bajdcc/clib2d
+The runnable exe file is available:
+[Download Here](https://github.com/ArtemisiaChief/Heracles/releases/download/v1.0/Heracles.v1.0.7z)
 
-    https://github.com/erincatto/Box2D
+For the source code, you can directly clone the latest master branch
 
-3. OpenGL:
-   
-    https://learnopengl-cn.github.io/
-
-    https://www.khronos.org/opengl/wiki/
-
-4. Separating Axis Theorem (SAT) Explanation
-   
-   http://www.metanetsoftware.com/technique/tutorialA.html
-
-   https://www.codeproject.com/Articles/15573/2D-Polygon-Collision-Detection
-
-   https://blog.csdn.net/cgcoder/article/details/7179575
-   
-   http://www.sevenson.com.au/actionscript/sat/
-
-   https://blog.csdn.net/yorhomwang/article/details/54869018
-
-   https://blog.csdn.net/qq_34594236/article/details/54015585
-
-5. Math
-   
-   多边形计算面积：https://www.cnblogs.com/xiexinxinlove/p/3708147.html
-
-   多边形计算质心：https://blog.csdn.net/nhl19961226/article/details/68941585
-
-   判断点是否在多边形内部：https://www.cnblogs.com/anningwang/p/7581545.html
-
-6. Physics
-
-    多边形计算转动惯量：https://zh.wikipedia.org/wiki/%E8%BD%89%E5%8B%95%E6%85%A3%E9%87%8F%E5%88%97%E8%A1%A8
+## References
+* [apollonia](https://github.com/wgtdkp/apollonia)
+* [clib2d](https://github.com/bajdcc/clib2d)
+* [OpenGL](https://learnopengl-cn.github.io/)
+* [Ray method](https://www.cnblogs.com/anningwang/p/7581545.html)
+* [Separating Axis Theorem](http://www.metanetsoftware.com/technique/tutorialA.html)
+* [Calculate area](https://www.cnblogs.com/xiexinxinlove/p/3708147.html)
+* [Calculate centroid](https://blog.csdn.net/nhl19961226/article/details/68941585)
+* [Calculate inertia](https://zh.wikipedia.org/wiki/%E8%BD%89%E5%8B%95%E6%85%A3%E9%87%8F%E5%88%97%E8%A1%A8)
