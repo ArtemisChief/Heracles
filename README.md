@@ -2,7 +2,9 @@
 
 > a simple 2D Graphic Physics Engine based on OpenGL 3.3
 
-Simple Physics Engine for simulating motion of convex polygon with adjustable paraments, such as gravitational acceleration, elastic collision coefficient, mass, size and friction coefficient. Use it for simple 2D game making, for education, or just for fun.
+Simple Physics Engine for simulating motion of convex polygon with adjustable paraments, such as gravitational acceleration, elastic collision coefficient, mass, size and friction coefficient. Use it for simple 2D game making, for education, or just for fun, for instance, use Genetic Algorithm to make a snake learn how to move.
+
+![Logo](https://raw.githubusercontent.com/ArtemisiaChief/Heracles/master/img/Logo.jpg)
 
 ## Demos
 
